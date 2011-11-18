@@ -1,0 +1,26 @@
+[buildout]
+newest = false
+prefer-final = true
+extends =
+extensions =
+    gp.vcsdevelop
+allow-hosts =
+    *.python.org
+    *.pytheon.net
+    *.bearstech.com
+    code.google.com
+    *.googlecode.com
+find-links=http://pypi.bearstech.com/build/
+dump-picked-versions-file =
+overwrite-picked-versions-file = true
+eggs-directory =
+bin-directory = ${buildout:directory}/bin
+parts = deploy
+versions = versions
+
+[versions]
+
+[deploy]
+recipe = pytheon.deploy
+exec-sitecustomize = false
+deploy-dir =

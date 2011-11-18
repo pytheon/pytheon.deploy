@@ -1,0 +1,2 @@
+recursive-include pytheon/deploy/ *.in
+recursive-include etc/ *.ini

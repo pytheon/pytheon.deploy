@@ -1,0 +1,56 @@
+upstream instance_${options.uuid} {
+    server ${options.bind} fail_timeout=0;
+}
+
+{% for port in [int(p.strip()) for p in options.get('listen', '80').split() if p.strip().isdigit()] %}
+server {
+    listen ${port};
+    keepalive_timeout 5;
+    client_max_body_size 4G;
+    server_name  ${options.host.replace('\n', ' ')};
+    access_log ${options.log_dir}/nginx.access.log combined;
+    access_log ${options.log_dir}/nginx.error.log;
+
+    {% if options.get('ssl_certificate') and port == 443 %}
+    ssl on;
+    ssl_certificate     ${options.get('ssl_certificate')};
+    ssl_certificate_key  ${options.get('ssl_certificate_key')};
+    ssl_session_timeout  5m;
+    ssl_protocols  SSLv2 SSLv3 TLSv1;
+    {% end if %}
+    
+    {% if options.get('document_root') %}
+    root ${options.document_root};
+    {% end if %}
+    {% for location in options.get('locations', '').split() %}
+    location ${location} {
+        root ${options.get('www')};
+    }
+    {% end for %}
+    location / {
+        proxy_set_header X-Forwarded-For ${'$'}proxy_add_x_forwarded_for;
+        proxy_set_header X-Forwarded-Proto ${'$'}scheme;
+        proxy_set_header X-Forwarder-Host ${'$'}host; 
+        proxy_set_header Host ${'$'}http_host;
+        proxy_redirect off;
+        {% if options.get('document_root') %}
+        if (!-f $request_filename) {
+            proxy_pass http://instance_${options.uuid};
+            break;
+        }
+        {% end if %}
+        {% if not options.get('document_root') %}
+        proxy_pass http://instance_${options.uuid};
+        {% end if %}
+    }
+
+}
+{% end for %}
+{% if 80 not in [int(p.strip()) for p in options.get('listen', '80').split() if p.strip().isdigit()] %}
+server {
+    listen 80;
+    server_name  ${options.host.replace('\n', ' ')};
+    rewrite ^(.*) https://${'$'}host${'$'}1 permanent;
+}
+{% end for %}
+
