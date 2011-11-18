@@ -5,20 +5,14 @@ This module contains the tool of pytheon.deploy
 import os
 import sys
 from setuptools import setup, find_packages
-try:
-   from distutils.command.build_py import build_py_2to3 \
-        as build_py
-except ImportError:
-   from distutils.command.build_py import build_py
 
+PY3 = sys.version_info[0] == 3
 
 def read(*rnames):
     filename = os.path.join(os.path.dirname(__file__), *rnames)
     if os.path.isfile(filename):
         return open(filename).read()
     return ''
-
-PY3 = sys.version_info[0] == 3
 
 version = '0.1'
 
@@ -75,6 +69,10 @@ else:
                        ]
 
 kw = dict(version='.'.join([str(i) for i in sys.version_info[:2]]))
+if PY3:
+   from distutils.command.build_py import build_py_2to3 \
+        as build_py
+    kw['cmdclass'] = {'build_py': build_py},
 
 setup(name='pytheon.deploy',
       version=version,
@@ -112,7 +110,6 @@ setup(name='pytheon.deploy',
       tests_require=tests_require,
       extras_require=dict(tests=tests_require),
       test_suite='pytheon.deploy.tests.test_docs.test_suite',
-      cmdclass = {'build_py': build_py},
       entry_points="""
       [zc.buildout]
       default = pytheon.deploy.recipes:Deploy
