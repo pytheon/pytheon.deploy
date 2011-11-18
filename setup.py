@@ -70,7 +70,7 @@ else:
 
 kw = dict(version='.'.join([str(i) for i in sys.version_info[:2]]))
 if PY3:
-   from distutils.command.build_py import build_py_2to3 \
+    from distutils.command.build_py import build_py_2to3 \
         as build_py
     kw['cmdclass'] = {'build_py': build_py},
 
