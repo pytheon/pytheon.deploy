@@ -194,7 +194,6 @@ def build_eggs(args=None):
         pwd = os.path.dirname(eggs_dir)
 
     os.chdir(pwd)
-    print 'build_eggs', eggs_dir
 
     for i, interpreter in enumerate(interpreters):
         build_dir = os.path.join(pwd, 'build', interpreter)
