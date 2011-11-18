@@ -67,6 +67,7 @@ for k, v in sys.modules.items():
         # This is a namespace package.  Remove it.
         sys.modules.pop(k)
 
+
 distribute_source = 'http://python-distribute.org/distribute_setup.py'
 
 
@@ -105,7 +106,7 @@ parser.add_option("--eggs",
                         "a temporary directory that is deleted when the "
                         "bootstrap script completes."))
 parser.add_option("-r", "--requirements", dest="requirements",
-                  action='append', default=[],
+                  action='append', default=['pytheon.deploy'],
                   help="a set of requirements")
 
 options, args = parser.parse_args()
@@ -179,25 +180,33 @@ if exitcode != 0:
            "were output by easy_install.")
     sys.exit(exitcode)
 
+
+os.environ['PYTHEON_PREFIX'] = prefix
+os.environ['PYTHEON_EGGS_DIR'] = eggs_dir
+
 buildout = os.path.join(share_dir, 'buildout.cfg')
 open(buildout, 'w').write('''
 [buildout]
 parts = bootstrap pytheon
 newest = false
 prefer-final = true
-eggs-directory = %(eggs)s
-bin-directory = %(prefix)s/bin
+eggs-directory = %(PYTHEON_EGGS_DIR)s
+bin-directory = %(PYTHEON_PREFIX)s/bin
 parts-directory = %(share_dir)s/parts
 develop-eggs-directory = %(share_dir)s/develop-eggs
+find-links =
+    https://github.com/pytheon/pytheon/tarball/master#egg=pytheon
+    https://github.com/pytheon/pytheon.deploy/tarball/master#egg=pytheon.deploy
 
 [bootstrap]
 recipe = z3c.recipe.scripts
 eggs = zc.buildout
 script-initialization =
     import os
-    os.chdir(%(prefix)r)
+    os.chdir(%(PYTHEON_PREFIX)r)
     if os.path.isfile('.installed.cfg'): os.remove('.installed.cfg')
-    os.environ['PYTHEON_EGGS_DIR'] = os.environ['PYTHON_EGGS'] = %(eggs)r
+    os.environ['PYTHEON_PREFIX'] = %(PYTHEON_PREFIX)r
+    os.environ['PYTHEON_EGGS_DIR'] = os.environ['PYTHON_EGGS'] = %(PYTHEON_EGGS_DIR)r
 entry-points =
     pytheon-upgrade=zc.buildout.buildout:main
 arguments = ['-c', %(buildout)r]
@@ -208,8 +217,9 @@ recipe = z3c.recipe.scripts
 eggs = %(reqs)s
 initialization =
     import os
-    os.environ['PYTHEON_EGGS_DIR'] = os.environ['PYTHON_EGGS'] = %(eggs)r
-''' % dict(eggs=eggs_dir, prefix=prefix, share_dir=share_dir,
+    os.environ['PYTHEON_PREFIX'] = %(PYTHEON_PREFIX)r
+    os.environ['PYTHEON_EGGS_DIR'] = os.environ['PYTHON_EGGS'] = %(PYTHEON_EGGS_DIR)r
+''' % dict(os.environ, share_dir=share_dir,
            buildout=buildout, reqs='\n    '.join(options.requirements)))
 
 ws.add_entry(eggs_dir)
@@ -217,5 +227,10 @@ ws.require(requirement)
 import zc.buildout.buildout
 zc.buildout.buildout.main(['-c', buildout])
 
+ws.require('pytheon.deploy')
+import pytheon.deploy.scripts
+pytheon.deploy.scripts.build_eggs([])
+
 os.remove('.installed.cfg')
+
 

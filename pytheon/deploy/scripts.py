@@ -166,22 +166,60 @@ def admin():
             execfile(os.path.join(lib_dir, 'environ.py'))
         utils.call('/bin/bash', 'post_install.sh', env=os.environ)
 
-def build_eggs():
+def build_eggs(args=None):
 
-    if os.path.isdir('/var/share/pytheon'):
+    parser.add_option("-i", "--interpreter", dest="interpreters",
+                      action="append", default=[])
+
+    if args is not None:
+        (options, args) = parser.parse_args(args)
+    else:
+        (options, args) = parser.parse_args()
+
+    interpreters = options.interpreters or ['.'.join([str(i) for i in sys.version_info[:2]])]
+
+    bin_dir = os.path.dirname(os.path.abspath(sys.argv[0]))
+
+    if 'PYTHEON_EGGS_DIR' in os.environ:
+        eggs_dir = os.environ['PYTHEON_EGGS_DIR']
+    elif os.path.isdir('/var/share/pytheon'):
         os.chdir('/var/share/pytheon')
+        eggs_dir = '/var/share/pytheon/eggs'
+    else:
+        eggs_dir = os.path.join(os.getcwd(), 'eggs')
+
+    pwd = os.path.dirname(eggs_dir)
+    os.chdir(pwd)
+    print 'build_eggs', eggs_dir
 
     for i, interpreter in enumerate(('2.5', '2.6')):
+        build_dir = os.path.join(pwd, 'build', interpreter)
+        if not os.path.isdir(build_dir):
+            os.makedirs(build_dir)
+        os.chdir(build_dir)
         if os.path.isfile('.installed.cfg'):
             os.unlink('.installed.cfg')
-        buildout = 'buildout-%s.cfg' % interpreter
+        buildout = os.path.join(build_dir, 'buildout-%s.cfg' % interpreter)
         config = Config.from_template('build_eggs.cfg')
-        config.buildout['dump-picked-versions-file'] = 'python%s-versions.cfg' % interpreter
-        config.buildout['parts-directory'] = os.path.join(os.getcwd(), 'parts-%s' % interpreter)
+        config.buildout['bin-directory'] = bin_dir
+        config.buildout['dump-picked-versions-file'] = os.path.join(eggs_dir, 'python%s-versions.cfg' % interpreter)
         config.buildout.extends = CONFIG.build_eggs.extends
-        config.deploy.eggs = CONFIG.build_eggs.eggs
-        scripts = ['%s=%s-%s' % (s, s, interpreter) for s in CONFIG.build_eggs.scripts.as_list()]
+        config.buildout['find-links'] = [
+            'https://github.com/pytheon/pytheon/tarball/master#egg=pytheon',
+            'https://github.com/pytheon/pytheon.deploy/tarball/master#egg=pytheon.deploy',
+          ]
+        config.versions = {'none': '0.0'}
+        eggs = CONFIG.build_eggs.eggs.as_list()
+        for egg in ['pytheon.deploy', 'zc.buildout']:
+            if egg not in eggs:
+                eggs.insert(0, egg)
+        config.deploy.eggs = eggs
+        scripts = CONFIG.build_eggs.scripts.as_list()
+        for script in ['buildout', 'pytheon-admin']:
+            if script not in scripts:
+                scripts.append(script)
+        scripts = ['%s=%s-%s' % (s, s, interpreter) for s in scripts]
         config.deploy.scripts = scripts
         config.write(buildout)
-        utils.buildout('python%s' % interpreter, buildout=buildout, eggs=os.getcwd())
+        utils.buildout('python%s' % interpreter, buildout=buildout, eggs=eggs_dir)
 
