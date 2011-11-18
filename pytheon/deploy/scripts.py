@@ -188,7 +188,11 @@ def build_eggs(args=None):
     else:
         eggs_dir = os.path.join(os.getcwd(), 'eggs')
 
-    pwd = os.path.dirname(eggs_dir)
+    if 'PYTHEON_PREFIX' in os.environ:
+        pwd = os.path.join(os.environ['PYTHEON_PREFIX'], 'lib', 'pytheon')
+    else:
+        pwd = os.path.dirname(eggs_dir)
+
     os.chdir(pwd)
     print 'build_eggs', eggs_dir
 

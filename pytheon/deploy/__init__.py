@@ -7,15 +7,14 @@ import os
 
 __all__ = ('CONFIG', 'Config', 'utils', 'log')
 
-ETC_DIR = '/etc/pytheon'
-EGGS_DIR = '/var/share/pytheon/eggs'
+ETC_DIR = os.path.join(os.environ.get('PYTHEON_PREFIX', '/'), 'etc', 'pytheon')
+
+
+EGGS_DIR = os.environ.get('PYTHEON_EGGS_DIR', '/var/share/pytheon/eggs')
 
 if not os.path.isdir(EGGS_DIR):
-    if 'PYTHEON_EGGS_DIR' in os.environ:
-        EGGS_DIR = os.environ['PYTHEON_EGGS_DIR']
-    else:
-        cfg = Config.from_file(os.path.expanduser(join('~', '.buildout', 'default.cfg')))
-        EGGS_DIR = cfg.buildout['eggs-directory'] or None
+    cfg = Config.from_file(os.path.expanduser(join('~', '.buildout', 'default.cfg')))
+    EGGS_DIR = cfg.buildout['eggs-directory'] or None
 
 if not EGGS_DIR or not os.path.isdir(EGGS_DIR):
     raise OSError("Can't find pytheon eggs directory")

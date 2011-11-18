@@ -113,9 +113,9 @@ options, args = parser.parse_args()
 
 prefix = os.path.abspath(options.prefix)
 
-share_dir = os.path.join(prefix, 'share', 'pytheon', 'buildout')
-if not os.path.isdir(share_dir):
-    os.makedirs(share_dir)
+lib_dir = os.path.join(prefix, 'lib', 'pytheon', 'buildout')
+if not os.path.isdir(lib_dir):
+    os.makedirs(lib_dir)
 os.chdir(prefix)
 
 if os.path.isfile('.installed.cfg'):
@@ -124,7 +124,7 @@ if os.path.isfile('.installed.cfg'):
 if options.eggs:
     eggs_dir = os.path.abspath(os.path.expanduser(options.eggs))
 else:
-    eggs_dir = os.path.join(prefix, 'share', 'pytheon', 'eggs')
+    eggs_dir = os.path.join(prefix, 'lib', 'pytheon', 'eggs')
 
 if not os.path.isdir(eggs_dir):
     os.makedirs(eggs_dir)
@@ -184,7 +184,7 @@ if exitcode != 0:
 os.environ['PYTHEON_PREFIX'] = prefix
 os.environ['PYTHEON_EGGS_DIR'] = eggs_dir
 
-buildout = os.path.join(share_dir, 'buildout.cfg')
+buildout = os.path.join(lib_dir, 'buildout.cfg')
 open(buildout, 'w').write('''
 [buildout]
 parts = bootstrap pytheon
@@ -192,8 +192,8 @@ newest = false
 prefer-final = true
 eggs-directory = %(PYTHEON_EGGS_DIR)s
 bin-directory = %(PYTHEON_PREFIX)s/bin
-parts-directory = %(share_dir)s/parts
-develop-eggs-directory = %(share_dir)s/develop-eggs
+parts-directory = %(lib_dir)s/parts
+develop-eggs-directory = %(lib_dir)s/develop-eggs
 find-links =
     https://github.com/pytheon/pytheon/tarball/master#egg=pytheon
     https://github.com/pytheon/pytheon.deploy/tarball/master#egg=pytheon.deploy
@@ -219,7 +219,7 @@ initialization =
     import os
     os.environ['PYTHEON_PREFIX'] = %(PYTHEON_PREFIX)r
     os.environ['PYTHEON_EGGS_DIR'] = os.environ['PYTHON_EGGS'] = %(PYTHEON_EGGS_DIR)r
-''' % dict(os.environ, share_dir=share_dir,
+''' % dict(os.environ, lib_dir=lib_dir,
            buildout=buildout, reqs='\n    '.join(options.requirements)))
 
 ws.add_entry(eggs_dir)
