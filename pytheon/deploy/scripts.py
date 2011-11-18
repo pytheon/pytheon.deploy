@@ -192,7 +192,7 @@ def build_eggs(args=None):
     os.chdir(pwd)
     print 'build_eggs', eggs_dir
 
-    for i, interpreter in enumerate(('2.5', '2.6')):
+    for i, interpreter in enumerate(interpreters):
         build_dir = os.path.join(pwd, 'build', interpreter)
         if not os.path.isdir(build_dir):
             os.makedirs(build_dir)

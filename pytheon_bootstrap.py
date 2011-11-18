@@ -106,7 +106,7 @@ parser.add_option("--eggs",
                         "a temporary directory that is deleted when the "
                         "bootstrap script completes."))
 parser.add_option("-r", "--requirements", dest="requirements",
-                  action='append', default=['pytheon.deploy'],
+                  action='append', default=['zc.buildout', 'pytheon.deploy'],
                   help="a set of requirements")
 
 options, args = parser.parse_args()
