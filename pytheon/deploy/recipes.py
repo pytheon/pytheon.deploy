@@ -81,7 +81,7 @@ if 'pytheon-serve' in sys.argv[0]:
 
 def safe_options(func):
     def wrapper(self, *args, **kwargs):
-        self.log('running %s', func.func_name)
+        self.log('running %s', getattr(func, 'func_name', getattr(func, '__name__', '')))
         buildout_options = self.buildout['buildout'].copy()
         #self.log('> buildout["buildout"] = %r', buildout_options)
         options = self.options.copy()
@@ -117,11 +117,14 @@ class Base(object):
         if 'uuid' not in self.options:
             self.options['uuid'] = str(uuid.uuid4())
         if 'password' not in self.options:
-            self.options['password'] = str(sha1(str(uuid.uuid4())).hexdigest())
+            if utils.PY3:
+                self.options['password'] = str(sha1(str(uuid.uuid4()).encode('ascii')).hexdigest())
+            else:
+                self.options['password'] = str(sha1(str(uuid.uuid4())).hexdigest())
 
         self.options['uid'] = getpass.getuser()
         self.options['gid'] = grp.getgrgid(os.getegid())[0]
-        self.options['eggs'] = self.options.get('eggs', 'PasteScript')
+        self.options['eggs'] = self.options.get('eggs', 'PasteDeploy')
         self.options['eggs'] += '\n' + self.buildout['buildout'].get('requirements-eggs', '')
 
         self.curdir = os.path.realpath(buildout['buildout']['directory'])
@@ -304,7 +307,18 @@ class Wsgi(Base):
                 arguments='%r, (t, t)' % wsgi_script,
                 script_initialization='import time; t = time.time()')
 
-        if self.options.get('use', 'gunicorn') == 'gunicorn':
+        if utils.PY3:
+            # add lib dir to extra_paths so cherrypy can find the wsgi script
+            dirname = os.path.dirname(wsgi_script)
+            self.install_script(
+                    name='cherrypy',
+                    scripts='pytheon-serve\nceleryd=celeryd',
+                    extra_paths=[dirname]+extra_paths,
+                    entry_points='pytheon-serve=pytheon.deploy.scripts:cherrypy_serve',
+                    eggs=self.options['eggs']+'\npytheon.deploy\nPasteDeploy' + addons_requires,
+                    script_initialization=SERVE % ([config, self.options['bind']],)
+                    )
+        elif self.options.get('use', 'gunicorn') == 'gunicorn':
             self.options['bind'] = 'unix:%s' % join(self.run_dir, 'gunicorn.sock')
             gu_config = self.install_config('gunicorn_config.py')
             # add lib dir to extra_paths so gunicorn can find the wsgi script
@@ -352,6 +366,10 @@ class Wsgi(Base):
 class Supervisor(Base):
 
     def install_supervisor(self, programs=None):
+
+        if utils.PY3:
+            return ()
+
         if programs is None:
             programs = []
 

@@ -21,6 +21,17 @@ log = utils.log
 
 parser = OptionParser()
 
+def cherrypy_serve():
+    from pytheon.deploy import wsgiserver3
+    config, bind_addr = sys.argv[1:3]
+    host , port = bind_addr.split(':')
+    bind_addr = (host, int(port))
+    from pytheon_wsgi import application
+    server = wsgiserver3.CherryPyWSGIServer(bind_addr, application,
+                                           server_name='cherrypy')
+    server.start()
+
+
 def admin():
 
     root = os.path.join(os.getcwd(), 'root')
