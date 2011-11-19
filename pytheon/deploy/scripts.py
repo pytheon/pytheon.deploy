@@ -190,7 +190,7 @@ def build_eggs(args=None):
 
     env = os.environ
     env.update(
-        PYTHEON_PREFIX=env.get('PYTHEON_PREFIX', pwd)),
+        PYTHEON_PREFIX=env.get('PYTHEON_PREFIX', pwd),
         PYTHEON_EGGS_DIR=env.get('PYTHEON_EGGS_DIR', eggs_dir))
 
     os.chdir(pwd)
