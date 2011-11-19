@@ -21,13 +21,10 @@ log = utils.log
 
 parser = OptionParser()
 
-def py2dsc():
-    dist = pkg_resources.get_distribution('stdeb')
-    namespace = {}
-    dist.run_script('py2dsc', namespace)
-    namespace['runit']()
-
 def admin():
+
+    root = os.path.join(os.getcwd(), 'root')
+
     parser.add_option("-i", "--interpreter", dest="interpreter",
                       action="store", default=sys.executable,
                       help='Default to: ' + sys.executable)
@@ -42,7 +39,8 @@ def admin():
     parser.add_option("--host", dest="host",
                       action="append", default=[])
     parser.add_option("-r", "--root", dest="root",
-                      action="store")
+                      action="store", default=root,
+                      help='Default to %s' % root)
     parser.add_option("-e", "--eggs", dest="eggs",
                       action="store", default=os.path.expanduser('~/eggs'),
                       help='Default to: '+os.path.expanduser('~/eggs'))
@@ -182,9 +180,6 @@ def build_eggs(args=None):
 
     if 'PYTHEON_EGGS_DIR' in os.environ:
         eggs_dir = os.environ['PYTHEON_EGGS_DIR']
-    elif os.path.isdir('/var/share/pytheon'):
-        os.chdir('/var/share/pytheon')
-        eggs_dir = '/var/share/pytheon/eggs'
     else:
         eggs_dir = os.path.join(os.getcwd(), 'eggs')
 
@@ -192,6 +187,11 @@ def build_eggs(args=None):
         pwd = os.path.join(os.environ['PYTHEON_PREFIX'], 'lib', 'pytheon')
     else:
         pwd = os.path.dirname(eggs_dir)
+
+    env = os.environ
+    env.update(
+        PYTHEON_PREFIX=env.get('PYTHEON_PREFIX', pwd)),
+        PYTHEON_EGGS_DIR=env.get('PYTHEON_EGGS_DIR', eggs_dir))
 
     os.chdir(pwd)
 
@@ -205,6 +205,7 @@ def build_eggs(args=None):
         buildout = os.path.join(build_dir, 'buildout-%s.cfg' % interpreter)
         config = Config.from_template('build_eggs.cfg')
         config.buildout['bin-directory'] = bin_dir
+        config.buildout['eggs-directory'] = eggs_dir
         config.buildout['dump-picked-versions-file'] = os.path.join(eggs_dir, 'python%s-versions.cfg' % interpreter)
         config.buildout.extends = CONFIG.build_eggs.extends
         config.buildout['find-links'] = [
@@ -223,6 +224,11 @@ def build_eggs(args=None):
                 scripts.append(script)
         scripts = ['%s=%s-%s' % (s, s, interpreter) for s in scripts]
         config.deploy.scripts = scripts
+        config.deploy.initialization = [
+                "import os'",
+                "os.environ['PYTHEON_PREFIX'] = %(PYTHEON_PREFIX)r" % env,
+                "os.environ['PYTHEON_EGGS_DIR'] = os.environ['PYTHON_EGGS'] = %(PYTHEON_EGGS_DIR)r" % env,
+            ]
         config.write(buildout)
         utils.buildout('python%s' % interpreter, buildout=buildout, eggs=eggs_dir)
 

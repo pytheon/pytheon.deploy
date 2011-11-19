@@ -28,11 +28,11 @@ sys.path = [p for p in reversed(sys.path)] # reverse paths to use eggs first
 
 import logging
 from paste.deploy import loadapp
-from paste.script.util.logging_config import fileConfig
 
 configfile = %r
 
 try:
+    from paste.script.util.logging_config import fileConfig
     fileConfig(configfile)
 except:
     logging.basicConfig(stream=sys.stderr, level=logging.WARN)
@@ -40,7 +40,16 @@ except:
 application = loadapp("config:" + configfile)
 """
 
-INITIALIZATION = """
+if utils.PY3:
+    INITIALIZATION = """
+def execfile(f):
+    exec(compile(open(f).read(), f, 'exec'), locals(), globals())
+"""
+
+else:
+    INITIALIZATION = ""
+
+INITIALIZATION += """
 import os
 %(environ_string)s
 lib_dir = %(lib_dir)r
@@ -276,7 +285,7 @@ class Wsgi(Base):
                 scripts='pytheon_wsgi.py=pytheon_wsgi.py',
                 arguments='"%s run as a main module", __file__',
                 extra_paths=extra_paths,
-                eggs=self.options['eggs']+'\npytheon.deploy\nPasteScript\nsqlalchemy' + addons_requires,
+                eggs=self.options['eggs']+'\npytheon.deploy\nPasteDeploy\nsqlalchemy' + addons_requires,
                 script_initialization=WSGI_SCRIPT % config,
                 )
         wsgi_script = os.path.join(self.lib_dir, 'pytheon_wsgi.py')
