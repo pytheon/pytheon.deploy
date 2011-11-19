@@ -225,7 +225,7 @@ def build_eggs(args=None):
         scripts = ['%s=%s-%s' % (s, s, interpreter) for s in scripts]
         config.deploy.scripts = scripts
         config.deploy.initialization = [
-                "import os'",
+                "import os",
                 "os.environ['PYTHEON_PREFIX'] = %(PYTHEON_PREFIX)r" % env,
                 "os.environ['PYTHEON_EGGS_DIR'] = os.environ['PYTHON_EGGS'] = %(PYTHEON_EGGS_DIR)r" % env,
             ]

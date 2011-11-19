@@ -10,13 +10,17 @@ import logging
 from hashlib import sha1
 from os.path import join
 from shutil import rmtree
-from cStringIO import StringIO
 from z3c.recipe.scripts import Scripts
 from collective.recipe.template.genshitemplate import Recipe as Template
 
 from pytheon.deploy import Config
 from pytheon.deploy import patches
 from pytheon import utils
+
+try:
+    from io import StringIO
+except ImportError:
+    from cStringIO import StringIO
 
 WSGI_SCRIPT = """
 for k in ('site', 'sitecustomize'):
