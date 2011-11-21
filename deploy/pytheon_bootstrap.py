@@ -180,7 +180,7 @@ if exitcode != 0:
 
 extends = [
     'http://download.zope.org/zopetoolkit/index/1.1/ztk-versions.cfg',
-    'http://raw.github.com/pytheon/pytheon.deploy/master/deploy/versions.cfg',
+    'https://raw.github.com/pytheon/pytheon.deploy/master/deploy/versions.cfg',
     ]
 
 os.environ['PYTHEON_PREFIX'] = prefix
@@ -237,7 +237,7 @@ if options.extends:
     if options.extends.startswith('http://'):
         extends.append(options.extends)
     else:
-        extends.append('http://raw.github.com/pytheon/pytheon.deploy/master/deploy/%s.cfg' % options.extends)
+        extends.append('https://raw.github.com/pytheon/pytheon.deploy/master/deploy/%s.cfg' % options.extends)
 
 os.makedirs(os.path.join(prefix, 'etc', 'pytheon'))
 open(os.makedirs(os.path.join(prefix, 'etc', 'pytheon', 'pytheon.ini'))).write('''
