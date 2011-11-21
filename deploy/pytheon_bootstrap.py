@@ -87,24 +87,21 @@ def normalize_to_url(option, opt_str, value, parser):
     setattr(parser.values, name, value)
 
 usage = '''\
-[DESIRED PYTHON FOR BUILDOUT] pytheon_bootstrap.py [options]
+python pytheon_bootstrap.py [options]
 
-Bootstraps a pytheon-based project.
-
-Simply run this script in a directory containing a buildout.cfg, using the
-Python that you want bin/buildout to use.
-
-Note that by using --setup-source and --download-base to point to
-local resources, you can keep this script from going over the network.
+Bootstraps a pytheon-based server.
 '''
 
 parser = OptionParser(usage=usage)
 parser.add_option("--prefix", default=os.getcwd(),
-                  help=("Specify a installation directory"))
+                  help=("Specify a installation directory. Defaults to current"
+                        " directory"))
 parser.add_option("--eggs",
                   help=("Specify a directory for storing eggs.  Defaults to "
-                        "a temporary directory that is deleted when the "
+                        "prefix/lib/pytheon/eggs"
                         "bootstrap script completes."))
+parser.add_option("--extends", dest="extends",
+                  help=("An extend file"))
 parser.add_option("-r", "--requirements", dest="requirements",
                   action='append', default=['zc.buildout', 'pytheon.deploy'],
                   help="a set of requirements")
@@ -181,6 +178,11 @@ if exitcode != 0:
     sys.exit(exitcode)
 
 
+extends = [
+    'http://download.zope.org/zopetoolkit/index/1.1/ztk-versions.cfg',
+    'http://raw.github.com/pytheon/pytheon.deploy/master/deploy/versions.cfg',
+    ]
+
 os.environ['PYTHEON_PREFIX'] = prefix
 os.environ['PYTHEON_EGGS_DIR'] = eggs_dir
 
@@ -188,12 +190,14 @@ buildout = os.path.join(lib_dir, 'buildout.cfg')
 open(buildout, 'w').write('''
 [buildout]
 parts = bootstrap pytheon
+extends = %(extends)s
 newest = false
 prefer-final = true
 eggs-directory = %(PYTHEON_EGGS_DIR)s
 bin-directory = %(PYTHEON_PREFIX)s/bin
 parts-directory = %(lib_dir)s/parts
 develop-eggs-directory = %(lib_dir)s/develop-eggs
+versions=versions
 find-links =
     https://github.com/pytheon/pytheon/tarball/master#egg=pytheon
     https://github.com/pytheon/pytheon.deploy/tarball/master#egg=pytheon.deploy
@@ -214,18 +218,42 @@ scripts = pytheon-upgrade
 
 [pytheon]
 recipe = z3c.recipe.scripts
-eggs = %(reqs)s
+eggs += %(reqs)s
 initialization =
     import os
     os.environ['PYTHEON_PREFIX'] = %(PYTHEON_PREFIX)r
     os.environ['PYTHEON_EGGS_DIR'] = os.environ['PYTHON_EGGS'] = %(PYTHEON_EGGS_DIR)r
-''' % dict(os.environ, lib_dir=lib_dir,
-           buildout=buildout, reqs='\n    '.join(options.requirements)))
+''' % dict(os.environ, lib_dir=lib_dir, buildout=buildout,
+           reqs='\n    '.join(options.requirements),
+           extends='\n    '.join(extends),
+           ))
 
 ws.add_entry(eggs_dir)
 ws.require(requirement)
 import zc.buildout.buildout
 zc.buildout.buildout.main(['-c', buildout])
+
+if options.extends:
+    if options.extends.startswith('http://'):
+        extends.append(options.extends)
+    else:
+        extends.append('http://raw.github.com/pytheon/pytheon.deploy/master/deploy/%s.cfg' % options.extends)
+
+os.makedirs(os.path.join(prefix, 'etc', 'pytheon'))
+open(os.makedirs(os.path.join(prefix, 'etc', 'pytheon', 'pytheon.ini'))).write('''
+[build_eggs]
+extends = %(extends)s
+scripts =
+    pytheon-admin
+    pytheon-eggs
+    pypimirror
+    buildout
+    fab
+eggs =
+    zc.buildout
+''' % dict(extends='\n    '.join(extends)))
+
+
 
 ws.require('pytheon.deploy')
 import pytheon.deploy.scripts
