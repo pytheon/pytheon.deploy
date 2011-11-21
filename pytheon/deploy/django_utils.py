@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 import os, sys
 from pytheon.utils import log
-from sqlalchemy import engine_from_config
+from pytheon.utils import engine_from_config
 
 def django_settings(config):
     import settings
@@ -10,14 +10,9 @@ def django_settings(config):
     DATABASES = {}
     CACHES = {}
 
-    sql_url = None
-    for key in ('PQ_URL', 'MYSQL_URL', 'SQLITE_URL'):
-        if key in os.environ:
-            sql_url = os.environ[key]
-            break
 
-    if sql_url:
-        engine = engine_from_config({'sqlalchemy.url': sql_url})
+    engine = engine_from_config({})
+    if engine:
         url = engine.url
         database = url.database
         drivername = url.drivername

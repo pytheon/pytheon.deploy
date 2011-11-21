@@ -148,6 +148,9 @@ class Base(object):
             self.options[k] = v
 
         if os.path.isfile(join(self.lib_dir, 'environ.py')):
+            if utils.PY3:
+            def execfile(f):
+                exec(compile(open(f).read(), f, 'exec'), locals(), globals())
             execfile(join(self.lib_dir, 'environ.py'))
 
         environ_string = ''
@@ -315,7 +318,7 @@ class Wsgi(Base):
                     scripts='pytheon-serve\nceleryd=celeryd',
                     extra_paths=[dirname]+extra_paths,
                     entry_points='pytheon-serve=pytheon.deploy.scripts:cherrypy_serve',
-                    eggs=self.options['eggs']+'\npytheon.deploy\nPasteDeploy' + addons_requires,
+                    eggs=self.options['eggs']+'\npytheon.deploy\nPasteDeploy\nsqlalchemy' + addons_requires,
                     script_initialization=SERVE % ([config, self.options['bind']],)
                     )
         elif self.options.get('use', 'gunicorn') == 'gunicorn':
