@@ -184,19 +184,11 @@ buildout = os.path.join(lib_dir, 'buildout.cfg')
 open(buildout, 'w').write('''
 [buildout]
 parts = bootstrap pytheon
-extends = %(extends)s
-newest = false
-prefer-final = true
+extends = https://raw.github.com/pytheon/pytheon.deploy/master/deploy/versions.cfg
 eggs-directory = %(PYTHEON_EGGS_DIR)s
 bin-directory = %(PYTHEON_PREFIX)s/bin
 parts-directory = %(lib_dir)s/parts
 develop-eggs-directory = %(lib_dir)s/develop-eggs
-versions=versions
-find-links =
-    https://github.com/pytheon/pytheon/tarball/master#egg=pytheon
-    https://github.com/pytheon/pytheon.deploy/tarball/master#egg=pytheon.deploy
-
-[versions]
 
 [bootstrap]
 recipe = z3c.recipe.scripts
@@ -241,9 +233,6 @@ if not os.path.isdir(etc_dir):
 open(os.path.join(etc_dir, 'pytheon.ini'), 'w').write('''
 [build_eggs]
 extends = %(extends)s
-find-links =
-    https://github.com/pytheon/pytheon/tarball/master#egg=pytheon
-    https://github.com/pytheon/pytheon.deploy/tarball/master#egg=pytheon.deploy
 scripts =
     pytheon-admin
     pytheon-eggs
