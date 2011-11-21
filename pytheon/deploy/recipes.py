@@ -22,6 +22,10 @@ try:
 except ImportError:
     from cStringIO import StringIO
 
+if utils.PY3:
+    def execfile(f):
+        exec(compile(open(f).read(), f, 'exec'), locals(), globals())
+
 WSGI_SCRIPT = """
 for k in ('site', 'sitecustomize'):
     if k in sys.modules:
@@ -148,9 +152,6 @@ class Base(object):
             self.options[k] = v
 
         if os.path.isfile(join(self.lib_dir, 'environ.py')):
-            if utils.PY3:
-            def execfile(f):
-                exec(compile(open(f).read(), f, 'exec'), locals(), globals())
             execfile(join(self.lib_dir, 'environ.py'))
 
         environ_string = ''
