@@ -126,27 +126,21 @@ else:
 if not os.path.isdir(eggs_dir):
     os.makedirs(eggs_dir)
 
-try:
-    import pkg_resources
-    import setuptools  # A flag.  Sometimes pkg_resources is installed alone.
-    if not hasattr(pkg_resources, '_distribute'):
-        raise ImportError
-except ImportError:
-    ez_code = urllib2.urlopen(
-        distribute_source).read().replace('\r\n', '\n')
-    ez = {}
-    exec ez_code in ez
-    setup_args = dict(to_dir=eggs_dir, download_delay=0)
-    setup_args['no_fake'] = True
-    ez['use_setuptools'](**setup_args)
-    if 'pkg_resources' in sys.modules:
-        reload(sys.modules['pkg_resources'])
-    import pkg_resources
-    # This does not (always?) update the default working set.  We will
-    # do it.
-    for path in sys.path:
-        if path not in pkg_resources.working_set.entries:
-            pkg_resources.working_set.add_entry(path)
+ez_code = urllib2.urlopen(
+    distribute_source).read().replace('\r\n', '\n')
+ez = {}
+exec ez_code in ez
+setup_args = dict(to_dir=eggs_dir, download_delay=0)
+setup_args['no_fake'] = True
+ez['use_setuptools'](**setup_args)
+if 'pkg_resources' in sys.modules:
+    reload(sys.modules['pkg_resources'])
+import pkg_resources
+# This does not (always?) update the default working set.  We will
+# do it.
+for path in sys.path:
+    if path not in pkg_resources.working_set.entries:
+        pkg_resources.working_set.add_entry(path)
 
 cmd = [quote(sys.executable),
        '-c',
@@ -165,9 +159,13 @@ env = dict(
     os.environ,
     PYTHONPATH=setup_requirement_path)
 
-requirement = 'zc.buildout'
-cmd.append(requirement)
+requirements = [
+    'zc.buildout',
+    ]
+cmd.extend(requirements)
 
+
+print cmd
 exitcode = os.spawnle(*([os.P_WAIT, sys.executable] + cmd + [env]))
 if exitcode != 0:
     sys.stdout.flush()
@@ -178,10 +176,6 @@ if exitcode != 0:
     sys.exit(exitcode)
 
 
-extends = [
-    'http://download.zope.org/zopetoolkit/index/1.1/ztk-versions.cfg',
-    'https://raw.github.com/pytheon/pytheon.deploy/master/deploy/versions.cfg',
-    ]
 
 os.environ['PYTHEON_PREFIX'] = prefix
 os.environ['PYTHEON_EGGS_DIR'] = eggs_dir
@@ -202,6 +196,8 @@ find-links =
     https://github.com/pytheon/pytheon/tarball/master#egg=pytheon
     https://github.com/pytheon/pytheon.deploy/tarball/master#egg=pytheon.deploy
 
+[versions]
+
 [bootstrap]
 recipe = z3c.recipe.scripts
 eggs = zc.buildout
@@ -218,20 +214,20 @@ scripts = pytheon-upgrade
 
 [pytheon]
 recipe = z3c.recipe.scripts
-eggs += %(reqs)s
+eggs = %(reqs)s
 initialization =
     import os
     os.environ['PYTHEON_PREFIX'] = %(PYTHEON_PREFIX)r
     os.environ['PYTHEON_EGGS_DIR'] = os.environ['PYTHON_EGGS'] = %(PYTHEON_EGGS_DIR)r
 ''' % dict(os.environ, lib_dir=lib_dir, buildout=buildout,
            reqs='\n    '.join(options.requirements),
-           extends='\n    '.join(extends),
+           extends='' #'\n    '.join(extends),
            ))
 
-ws.add_entry(eggs_dir)
-ws.require(requirement)
-import zc.buildout.buildout
-zc.buildout.buildout.main(['-c', buildout])
+extends = [
+    'http://download.zope.org/zopetoolkit/index/1.1/ztk-versions.cfg',
+    'https://raw.github.com/pytheon/pytheon.deploy/master/deploy/versions.cfg',
+    ]
 
 if options.extends:
     if options.extends.startswith('http://'):
@@ -239,10 +235,15 @@ if options.extends:
     else:
         extends.append('https://raw.github.com/pytheon/pytheon.deploy/master/deploy/%s.cfg' % options.extends)
 
-os.makedirs(os.path.join(prefix, 'etc', 'pytheon'))
-open(os.makedirs(os.path.join(prefix, 'etc', 'pytheon', 'pytheon.ini'))).write('''
+etc_dir = os.path.join(prefix, 'etc', 'pytheon')
+if not os.path.isdir(etc_dir):
+    os.makedirs(etc_dir)
+open(os.path.join(etc_dir, 'pytheon.ini'), 'w').write('''
 [build_eggs]
 extends = %(extends)s
+find-links =
+    https://github.com/pytheon/pytheon/tarball/master#egg=pytheon
+    https://github.com/pytheon/pytheon.deploy/tarball/master#egg=pytheon.deploy
 scripts =
     pytheon-admin
     pytheon-eggs
@@ -253,12 +254,14 @@ eggs =
     gp.vcsdevelop
 ''' % dict(extends='\n    '.join(extends)))
 
+ws.add_entry(eggs_dir)
+for r in requirements:
+    ws.require(r)
 
+import zc.buildout.buildout
+os.chdir(os.path.dirname(buildout))
+zc.buildout.buildout.main(['bootstrap'])
 
-ws.require('pytheon.deploy')
-import pytheon.deploy.scripts
-pytheon.deploy.scripts.build_eggs([])
-
-os.remove('.installed.cfg')
-
+os.chdir(prefix)
+subprocess.Popen(['bin/buildout', '-c', buildout]).wait()
 
