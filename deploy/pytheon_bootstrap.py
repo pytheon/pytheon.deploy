@@ -246,11 +246,11 @@ extends = %(extends)s
 scripts =
     pytheon-admin
     pytheon-eggs
-    pypimirror
     buildout
     fab
 eggs =
     zc.buildout
+    gp.vcsdevelop
 ''' % dict(extends='\n    '.join(extends)))
 
 
