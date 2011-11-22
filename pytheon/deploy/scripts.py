@@ -228,7 +228,7 @@ def build_eggs(args=None):
         for egg in ['pytheon.deploy', 'zc.buildout']:
             if egg not in eggs:
                 eggs.insert(0, egg)
-        config.deploy.eggs = eggs
+        config.deploy.eggs = eggs + ['${buildout:eggs}']
         scripts = CONFIG.build_eggs.scripts.as_list()
         for script in ['buildout', 'pytheon-admin']:
             if script not in scripts:
