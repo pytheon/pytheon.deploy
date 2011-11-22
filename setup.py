@@ -121,7 +121,6 @@ setup(name='pytheon.deploy',
       [console_scripts]
       pytheon-admin = pytheon.deploy.scripts:admin
       pytheon-admin-%(version)s = pytheon.deploy.scripts:admin
-      pytheon-eggs = pytheon.deploy.scripts:build_eggs
-      py2dsc = pytheon.deploy.scripts:py2dsc
+      build-eggs = pytheon.deploy.scripts:build_eggs
       """ % kw,
       )

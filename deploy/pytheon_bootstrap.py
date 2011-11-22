@@ -100,7 +100,7 @@ parser.add_option("--eggs",
                   help=("Specify a directory for storing eggs.  Defaults to "
                         "prefix/lib/pytheon/eggs"
                         "bootstrap script completes."))
-parser.add_option("--extends", dest="extends",
+parser.add_option("--extend", dest="extends",
                   help=("An extend file"))
 parser.add_option("-r", "--requirements", dest="requirements",
                   action='append', default=['zc.buildout', 'pytheon.deploy'],
@@ -206,7 +206,9 @@ scripts = pytheon-upgrade
 
 [pytheon]
 recipe = z3c.recipe.scripts
-eggs = %(reqs)s
+eggs =
+    %(reqs)s
+    ${buildout:eggs}
 initialization =
     import os
     os.environ['PYTHEON_PREFIX'] = %(PYTHEON_PREFIX)r
