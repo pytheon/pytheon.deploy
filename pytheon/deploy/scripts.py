@@ -2,12 +2,8 @@
 import os
 import sys
 import time
-import urllib
 import shutil
-import tempfile
-import subprocess
 import logging
-import pkg_resources
 from glob import glob
 from os.path import join
 from optparse import OptionParser
@@ -21,10 +17,11 @@ log = utils.log
 
 parser = OptionParser()
 
+
 def cherrypy_serve():
     from pytheon.deploy import wsgiserver3
     config, bind_addr = sys.argv[1:3]
-    host , port = bind_addr.split(':')
+    host, port = bind_addr.split(':')
     bind_addr = (host, int(port))
     from pytheon_wsgi import application
     server = wsgiserver3.CherryPyWSGIServer(bind_addr, application,
@@ -54,7 +51,7 @@ def admin():
                       help='Default to %s' % root)
     parser.add_option("-e", "--eggs", dest="eggs",
                       action="store", default=os.path.expanduser('~/eggs'),
-                      help='Default to: '+os.path.expanduser('~/eggs'))
+                      help='Default to: ' + os.path.expanduser('~/eggs'))
     parser.add_option("--develop", dest="develop",
                       action="append", default=[])
 
@@ -101,7 +98,8 @@ def admin():
         # .git url or local path are git repositories
         if options.source.endswith('.git') or options.source.startswith('/'):
             if options.app_name:
-                utils.call('git', 'clone', '-q', options.source, options.app_name)
+                utils.call('git', 'clone', '-q', options.source,
+                                                 options.app_name)
             else:
                 utils.call('git', 'clone', '-q', options.source)
             app_dir = guess_app()
@@ -110,10 +108,12 @@ def admin():
             if options.branch and options.branch != 'master':
                 log.info(os.listdir(os.getcwd()))
                 log.info(os.environ)
-                utils.call('git', 'checkout', '-b', options.branch, 'origin/%s' % options.branch)
+                utils.call('git', 'checkout', '-b', options.branch,
+                                  'origin/%s' % options.branch)
         else:
             if options.app_name:
-                utils.call('hg', 'clone', '-q', options.source, options.app_name)
+                utils.call('hg', 'clone', '-q', options.source,
+                                                options.app_name)
             else:
                 utils.call('hg', 'clone', '-q', options.source)
             app_dir = guess_app()
@@ -140,7 +140,8 @@ def admin():
     var = utils.realpath(root, 'var', 'buildout')
 
     config = Config.from_template('pytheon.cfg')
-    config.buildout['dump-picked-versions-file'] = join(root, 'etc', 'versions.cfg')
+    config.buildout['dump-picked-versions-file'] = join(root, 'etc',
+                                                              'versions.cfg')
     config.buildout['eggs-directory'] = options.eggs or join(var, 'eggs')
     config.buildout['parts-directory'] = join(var, 'parts')
     config.buildout['develop-eggs-directory'] = join(var, 'develop-eggs')
@@ -166,7 +167,8 @@ def admin():
 
     env = dict([v.split('=', 1) for v in args if '=' in v])
 
-    utils.buildout(options.interpreter, buildout, eggs=CONFIG.pytheon.eggs_dir, env=env)
+    utils.buildout(options.interpreter, buildout,
+                   eggs=CONFIG.pytheon.eggs_dir, env=env)
 
     if os.path.isfile('post_install.sh'):
         os.environ.update(env)
@@ -174,6 +176,7 @@ def admin():
         if os.path.isfile(os.path.join(lib_dir, 'environ.py')):
             execfile(os.path.join(lib_dir, 'environ.py'))
         utils.call('/bin/bash', 'post_install.sh', env=os.environ)
+
 
 def build_eggs(args=None):
 
@@ -185,7 +188,8 @@ def build_eggs(args=None):
     else:
         (options, args) = parser.parse_args()
 
-    interpreters = options.interpreters or ['.'.join([str(i) for i in sys.version_info[:2]])]
+    interpreters = options.interpreters or \
+                   ['.'.join([str(i) for i in sys.version_info[:2]])]
 
     bin_dir = os.path.dirname(os.path.abspath(sys.argv[0]))
 
@@ -217,11 +221,13 @@ def build_eggs(args=None):
         config = Config.from_template('build_eggs.cfg')
         config.buildout['bin-directory'] = bin_dir
         config.buildout['eggs-directory'] = eggs_dir
-        config.buildout['dump-picked-versions-file'] = os.path.join(eggs_dir, 'python%s-versions.cfg' % interpreter)
+        config.buildout['dump-picked-versions-file'] = os.path.join(
+                               eggs_dir, 'python%s-versions.cfg' % interpreter)
         config.buildout.extends = CONFIG.build_eggs.extends
         config.buildout['find-links'] = [
             'https://github.com/pytheon/pytheon/tarball/master#egg=pytheon',
-            'https://github.com/pytheon/pytheon.deploy/tarball/master#egg=pytheon.deploy',
+            ('https://github.com/pytheon/pytheon.deploy/tarball/master'
+             '#egg=pytheon.deploy'),
           ]
         config.versions = {'none': '0.0'}
         eggs = CONFIG.build_eggs.eggs.as_list()
@@ -236,10 +242,11 @@ def build_eggs(args=None):
         scripts = ['%s=%s-%s' % (s, s, interpreter) for s in scripts]
         config.deploy.scripts = scripts
         config.deploy.initialization = [
-                "import os",
-                "os.environ['PYTHEON_PREFIX'] = %(PYTHEON_PREFIX)r" % env,
-                "os.environ['PYTHEON_EGGS_DIR'] = os.environ['PYTHON_EGGS'] = %(PYTHEON_EGGS_DIR)r" % env,
-            ]
+            "import os",
+            "os.environ['PYTHEON_PREFIX'] = %(PYTHEON_PREFIX)r" % env,
+            ("os.environ['PYTHEON_EGGS_DIR'] ="
+             "os.environ['PYTHON_EGGS'] = %(PYTHEON_EGGS_DIR)r") % env,
+          ]
         config.write(buildout)
-        utils.buildout('python%s' % interpreter, buildout=buildout, eggs=eggs_dir)
-
+        utils.buildout('python%s' % interpreter, buildout=buildout,
+                                                 eggs=eggs_dir)
