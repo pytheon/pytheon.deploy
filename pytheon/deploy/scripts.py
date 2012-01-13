@@ -165,13 +165,13 @@ def admin():
     buildout = 'pytheon.cfg'
     config.write(buildout)
 
-    env = dict([v.split('=', 1) for v in args if '=' in v])
+    env = os.environ
+    env.update(dict([v.split('=', 1) for v in args if '=' in v]))
 
     utils.buildout(options.interpreter, buildout,
                    eggs=CONFIG.pytheon.eggs_dir, env=env)
 
     if os.path.isfile('post_install.sh'):
-        os.environ.update(env)
         lib_dir = join(root, 'lib')
         if os.path.isfile(os.path.join(lib_dir, 'environ.py')):
             execfile(os.path.join(lib_dir, 'environ.py'))

@@ -33,5 +33,9 @@ import os
         Allow from all
     </Location>
 
+    {% if options.get('include') %}
+    Include ${options.get('include')}
+    {% end if %}
+
 </VirtualHost>
 

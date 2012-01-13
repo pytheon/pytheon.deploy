@@ -18,7 +18,7 @@ server {
     ssl_session_timeout  5m;
     ssl_protocols  SSLv2 SSLv3 TLSv1;
     {% end if %}
-    
+
     {% if options.get('document_root') %}
     root ${options.document_root};
     {% end if %}
@@ -30,7 +30,7 @@ server {
     location / {
         proxy_set_header X-Forwarded-For ${'$'}proxy_add_x_forwarded_for;
         proxy_set_header X-Forwarded-Proto ${'$'}scheme;
-        proxy_set_header X-Forwarder-Host ${'$'}host; 
+        proxy_set_header X-Forwarder-Host ${'$'}host;
         proxy_set_header Host ${'$'}http_host;
         proxy_redirect off;
         {% if options.get('document_root') %}
@@ -43,6 +43,10 @@ server {
         proxy_pass http://instance_${options.uuid};
         {% end if %}
     }
+
+    {% if options.get('include') %}
+    include ${options.get('include')}
+    {% end if %}
 
 }
 {% end for %}

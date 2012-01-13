@@ -130,6 +130,8 @@ class Base(object):
         self.options['eggs'] += '\n' + self.buildout['buildout'].get(
                                                     'requirements-eggs', '')
 
+        self.options['include'] = self.options.get('include', '')
+
         self.curdir = os.path.realpath(buildout['buildout']['directory'])
         self.deploy_dir = utils.realpath(options.get('deploy-dir',
                              join(self.buildout['buildout']['parts-directory'],
