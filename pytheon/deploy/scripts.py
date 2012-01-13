@@ -106,8 +106,6 @@ def admin():
             log.info(app_dir)
             os.chdir(app_dir)
             if options.branch and options.branch != 'master':
-                log.info(os.listdir(os.getcwd()))
-                log.info(os.environ)
                 utils.call('git', 'checkout', '-b', options.branch,
                                   'origin/%s' % options.branch)
         else:
