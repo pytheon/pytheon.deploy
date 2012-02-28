@@ -159,7 +159,7 @@ class Base(object):
         environ_string = ''
         for envvar in options.get('environ', '').split('\n'):
             envvar = envvar.strip()
-            if envvar:
+            if envvar and '=' in envvar:
                 k, v = envvar.split('=', 1)
                 environ_string += '\nos.environ[%r] = %r' % (k.upper(), v)
                 os.environ[k.upper()] = str(v)
