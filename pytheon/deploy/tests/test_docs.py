@@ -9,6 +9,7 @@ import zc.buildout.tests
 import zc.buildout.testing
 
 from zope.testing import doctest, renormalizing
+import zope.testing.DocFileCase
 
 
 optionflags =  (doctest.ELLIPSIS |
@@ -43,7 +44,7 @@ def setUp(test):
 globs = {}
 
 
-class TestCase(doctest.DocFileCase):
+class TestCase(DocFileCase):
 
     def __new__(*args, **kwargs):
         return doctest.DocFileTest(
