@@ -10,7 +10,7 @@ import zc.buildout.testing
 
 from zope.testing import renormalizing
 import doctest
-import doctest.DocFileCase
+from doctest import DocFileCase
 
 
 optionflags =  (doctest.ELLIPSIS |
