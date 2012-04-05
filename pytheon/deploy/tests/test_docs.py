@@ -4,15 +4,16 @@ Doctest runner for 'pytheon.deploy'.
 """
 __docformat__ = 'restructuredtext'
 
+import os
 import unittest
 import zc.buildout.tests
 import zc.buildout.testing
 
-from zope.testing import doctest, renormalizing
-from zope.testing.doctest import DocFileCase
+from zope.testing import renormalizing
+import doctest
 
 
-optionflags =  (doctest.ELLIPSIS |
+optionflags = (doctest.ELLIPSIS |
                 doctest.NORMALIZE_WHITESPACE |
                 doctest.REPORT_ONLY_FIRST_FAILURE)
 
@@ -44,14 +45,19 @@ def setUp(test):
 globs = {}
 
 
-class TestCase(DocFileCase):
+class TestCase(doctest.DocFileCase):
 
-    def __new__(*args, **kwargs):
-        return doctest.DocFileTest(
-                '../README.txt',
+    def __init__(self, *args, **kwargs):
+        parser = doctest.DocTestParser()
+        self.path = os.path.join(os.path.dirname(__file__), '..', 'README.txt')
+        self.name = os.path.basename(self.path)
+        doc = open(self.path).read()
+        test = parser.get_doctest(doc, globals(), self.name, self.path, 0)
+
+        # init doc test case
+        doctest.DocFileCase.__init__(self, test, optionflags=optionflags,
                 setUp=setUp,
                 tearDown=zc.buildout.testing.buildoutTearDown,
-                optionflags=optionflags,
                 checker=renormalizing.RENormalizing([
                         # If want to clean up the doctest output you
                         # can register additional regexp normalizers
@@ -62,6 +68,9 @@ class TestCase(DocFileCase):
                         zc.buildout.testing.normalize_path,
                         ]),
                 )
+
+    def shortDescription(self):
+        return self.path
 
 if __name__ == '__main__':
     unittest.main(defaultTest='suite')
