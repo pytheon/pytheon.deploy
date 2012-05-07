@@ -30,7 +30,12 @@ for k in ('site', 'sitecustomize'):
         del sys.modules[k]
 del k
 import site # imports custom buildout-generated site.py
-sys.path = [p for p in reversed(sys.path)] # reverse paths to use eggs first
+
+# alway use eggs first
+path = [p for p in sys.path if p.endswith('.egg')]
+path += [p for p in sys.path if not p.endswith('.egg')]
+sys.path = path[:]
+del path
 
 import logging
 from paste.deploy import loadapp
