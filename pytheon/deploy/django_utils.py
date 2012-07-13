@@ -37,8 +37,8 @@ def django_settings(config):
             location = os.environ[key]
             if ',' in location:
                 location = location.split(',')
-            CACHES.getdefault('default', {})
-            for cache in CACHES.value():
+            CACHES.setdefault('default', {})
+            for cache in CACHES.values():
                 cache.update({
                     'BACKEND': value,
                     'LOCATION': location,
