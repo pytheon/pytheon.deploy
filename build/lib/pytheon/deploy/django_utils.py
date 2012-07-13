@@ -1,18 +1,23 @@
 # -*- coding: utf-8 -*-
-import os
+import os, sys
 from pytheon.utils import log
-from pytheon.utils import engine_from_config
-
+from sqlalchemy import engine_from_config
 
 def django_settings(config):
     import settings
     os.environ['DJANGO_SETTINGS_MODULE'] = 'settings'
 
     DATABASES = {}
-    CACHES = getattr(settings, 'CACHES', {})
+    CACHES = {}
 
-    engine = engine_from_config({})
-    if engine:
+    sql_url = None
+    for key in ('PQ_URL', 'MYSQL_URL', 'SQLITE_URL'):
+        if key in os.environ:
+            sql_url = os.environ[key]
+            break
+
+    if sql_url:
+        engine = engine_from_config({'sqlalchemy.url': sql_url})
         url = engine.url
         database = url.database
         drivername = url.drivername
@@ -30,19 +35,16 @@ def django_settings(config):
         }
 
     for key, value in (
-          ('MEMCACHED', 'django.core.cache.backends.memcached.MemcachedCache'),
-          ('DATABASE_CACHE', 'django.core.cache.backends.db.DatabaseCache'),
-        ):
+                ('MEMCACHED', 'django.core.cache.backends.memcached.MemcachedCache'),
+                ('DATABASE_CACHE', 'django.core.cache.backends.db.DatabaseCache'),
+            ):
         if key in os.environ:
-            location = os.environ[key]
-            if ',' in location:
-                location = location.split(',')
-            CACHES.getdefault('default', {})
-            for cache in CACHES.value():
-                cache.update({
+            CACHES = {
+                'default': {
                     'BACKEND': value,
-                    'LOCATION': location,
-                })
+                    'LOCATION': os.environ[key],
+                }
+            }
             break
 
     log.debug('DATABASES = %r' % DATABASES)
@@ -55,12 +57,9 @@ def django_settings(config):
     # bugs...
     from django.conf import settings as sets
     _ = sets.DATABASES
-    log.debug(_)
     _ = sets.CACHES
-    log.debug(_)
 
     return settings
-
 
 def patch_file_storage():
     from django.core.files import storage
@@ -73,8 +72,7 @@ def patch_file_storage():
         try:
             path = storage.safe_join(os.environ['UPLOAD_ROOT'], name)
         except ValueError:
-            raise storage.SuspiciousOperation(
-                        "Attempted access to '%s' denied." % name)
+            raise storage.SuspiciousOperation("Attempted access to '%s' denied." % name)
         return os.path.normpath(path)
 
     def FileSystemStorage_url(self, name):
@@ -88,7 +86,6 @@ def patch_file_storage():
     log.warn('FileSystemStorage patched. /uploads must be bound to %s',
                     os.environ['UPLOAD_ROOT'])
 
-
 def manage(config):
     from pytheon.utils import Config
     config = Config.from_file(config)
@@ -97,7 +94,6 @@ def manage(config):
     from django.core.management import execute_manager
     execute_manager(settings)
 
-
 def make_django(global_config, **config):
     settings = django_settings(config)
     setattr(settings, 'DEBUG', False)
@@ -105,3 +101,4 @@ def make_django(global_config, **config):
     import django.core.handlers.wsgi
     application = django.core.handlers.wsgi.WSGIHandler()
     return application
+

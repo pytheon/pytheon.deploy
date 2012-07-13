@@ -1,0 +1,33 @@
+[unix_http_server]
+port = 9999
+file = ${options.run_dir}/supervisor.sock
+chmod = 0777
+username = supervisor
+password = ${options.password}
+
+[supervisord]
+logfile = ${options.log_dir}/supervisord.log
+logfile_maxbytes = 10MB
+logfile_backups = 5
+loglevel = info
+pidfile = ${options.run_dir}/supervisord.pid
+nodaemon = false
+
+[supervisorctl]
+serverurl = unix://${options.run_dir}/supervisor.sock
+username = supervisor
+password = ${options.password}
+
+[rpcinterface:supervisor]
+supervisor.rpcinterface_factory=supervisor.rpcinterface:make_main_rpcinterface
+
+{% for i, program in enumerate([p.split('=') for p in options.programs.split('\n') if p.strip() and '=' in p]) %}
+[program:${program[0].strip()}]
+priority = ${i}
+process_name = ${program[0].strip()}
+command = ${program[1].strip()}
+directory = ${options.curdir}
+autostart = ${options.get('autostart', 'true')}
+autorestart = ${options.get('autorestart', 'true')}
+redirect_stderr = ${options.get('redirect-stderr', 'true')}
+{% end for %}
