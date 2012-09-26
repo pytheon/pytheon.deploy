@@ -111,5 +111,7 @@ setup(name='pytheon.deploy',
       pytheon-admin = pytheon.deploy.scripts:admin
       pytheon-admin-%(version)s = pytheon.deploy.scripts:admin
       build-eggs = pytheon.deploy.scripts:build_eggs
+      create-mysql-db = pytheon.deploy.scripts:create_db
+      backup-db = pytheon.deploy.scripts:backup_db
       """ % kw,
       )

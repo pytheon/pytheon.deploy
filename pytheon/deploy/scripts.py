@@ -248,3 +248,54 @@ def build_eggs(args=None):
         config.write(buildout)
         utils.buildout('python%s' % interpreter, buildout=buildout,
                                                  eggs=eggs_dir)
+
+
+def backup_db():
+    parser.add_option("--url", dest="url", default=None)
+    parser.add_option("--dry-run", dest="dry_run",
+                      action='store_true', default=False)
+    options, args = parser.parse_args()
+    if options.url and options.url.startswith('mysql://'):
+        os.environ['MYSQL_URL'] = str(options.url)
+    try:
+        utils.backup_db(os.path.expanduser('~/'),
+                        dry_run=options.dry_run)
+    except Exception, e:
+        log.exception(e)
+        sys.exit(1)
+
+
+def create_db():
+    import binascii
+    parser.add_option("-u", "--username", dest="username", default=None)
+    parser.add_option("-p", "--password", dest="password",
+                      default=binascii.b2a_base64(os.urandom(10)))
+    options, args = parser.parse_args()
+
+    if not options.username:
+        parser.error('Username is required')
+
+    script = ('CREATE DATABASE `%(username)s` '
+              'DEFAULT CHARACTER SET utf8 COLLATE utf8_unicode_ci;\n'
+              "GRANT ALL PRIVILEGES ON `%(username)s` . * "
+              "TO '%(username)s'@'localhost' IDENTIFIED BY '%(password)s';")
+
+    import tempfile
+    import subprocess
+    data = dict(username=options.username,
+                password=options.password.strip('=\n'))
+    with tempfile.NamedTemporaryFile(prefix='mysql-',
+                                     suffix='.sql') as fd:
+            script = script % data
+            print script
+            fd.write(script)
+            fd.flush()
+            p = subprocess.call('cat %s|mysql' % fd.name, shell=True)
+            if p > 0:
+                sys.exit(p)
+    print ('MYSQL_URL=mysql://%(username)s:%(password)s@'
+           'localhost/%(username)s') % data
+    print 'cat << EOF > ~/.my.cnf'
+    print '[client]'
+    print 'user=%(username)s' % data
+    print 'password=%(password)s' % data
