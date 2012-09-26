@@ -251,7 +251,15 @@ def build_eggs(args=None):
 
 
 def backup_db():
-    parser.add_option("--url", dest="url", default=None)
+    parser.usage = '''%prog [options]
+
+    Backup a database. If --url is not specified then the script will try to
+    use MYSQL_URL environment variable then .my.cnf to retrieve the correct
+    informations (username/password/host/database)'''
+
+    parser.add_option("--url", dest="url", default=None,
+                      metavar="MYSQL_URL",
+                      help="A valid mysql:// url")
     parser.add_option("--dry-run", dest="dry_run",
                       action='store_true', default=False)
     options, args = parser.parse_args()
@@ -273,22 +281,39 @@ def create_db():
     chars = [c for c in chars if c in valid_chars]
     password = ''.join(chars)[:12]
 
+    parser.usage = '''%prog [options]
+
+    Create a mysql database'''
+
     parser.add_option("-u", "--username", dest="username", default=None)
-    parser.add_option("-p", "--password", dest="password", default=password)
+    parser.add_option("-p", "--password", dest="password", default=password,
+                      help="A random password is generated if not specified")
+    parser.add_option("-n", "--database", dest="database", default=None,
+                      help="database name. Default to USERNAME")
+    parser.add_option("--drop-db", dest="drop", action='store_true',
+                      help="try to drop database first",
+                      default=False)
     options, args = parser.parse_args()
 
     if not options.username:
         parser.error('Username is required')
 
-    script = ('DROP DATABASE IF EXISTS %(username)s;\n'
-              'CREATE DATABASE `%(username)s` '
-              'DEFAULT CHARACTER SET utf8 COLLATE utf8_unicode_ci;\n'
-              "GRANT ALL PRIVILEGES ON `%(username)s` . * "
-              "TO '%(username)s'@'localhost' IDENTIFIED BY '%(password)s';")
+    if not options.database:
+        options.database = options.username
+
+    if options.drop:
+        script = 'DROP DATABASE IF EXISTS %(database)s;\n'
+    else:
+        script = ''
+    script += ('CREATE DATABASE `%(database)s` '
+               'DEFAULT CHARACTER SET utf8 COLLATE utf8_unicode_ci;\n'
+               "GRANT ALL PRIVILEGES ON `%(database)s` . * "
+               "TO '%(username)s'@'localhost' IDENTIFIED BY '%(password)s';")
 
     import tempfile
     import subprocess
-    data = dict(username=options.username,
+    data = dict(database=options.database,
+                username=options.username,
                 password=options.password)
     with tempfile.NamedTemporaryFile(prefix='mysql-',
                                      suffix='.sql') as fd:
@@ -300,7 +325,7 @@ def create_db():
             if p > 0:
                 sys.exit(p)
     print
-    print ('MYSQL_URL=mysql://%(username)s:%(password)s@'
-           'localhost/%(username)s') % data
+    print '[client]\nuser=%(username)s\npassword=%(password)s' % data
     print
-    print '[client]\nuser=%(username)s\npassword=%(password)s\n' % data
+    print ('MYSQL_URL=mysql://%(username)s:%(password)s@'
+           'localhost/%(database)s') % data
