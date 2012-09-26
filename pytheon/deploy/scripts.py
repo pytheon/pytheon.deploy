@@ -266,16 +266,22 @@ def backup_db():
 
 
 def create_db():
+    import string
     import binascii
+    valid_chars = string.ascii_letters + string.digits
+    chars = binascii.b2a_base64(os.urandom(100))
+    chars = [c for c in chars if c in valid_chars]
+    password = ''.join(chars)[:12]
+
     parser.add_option("-u", "--username", dest="username", default=None)
-    parser.add_option("-p", "--password", dest="password",
-                      default=binascii.b2a_base64(os.urandom(10)))
+    parser.add_option("-p", "--password", dest="password", default=password)
     options, args = parser.parse_args()
 
     if not options.username:
         parser.error('Username is required')
 
-    script = ('CREATE DATABASE `%(username)s` '
+    script = ('DROP DATABASE IF EXISTS %(username)s;\n'
+              'CREATE DATABASE `%(username)s` '
               'DEFAULT CHARACTER SET utf8 COLLATE utf8_unicode_ci;\n'
               "GRANT ALL PRIVILEGES ON `%(username)s` . * "
               "TO '%(username)s'@'localhost' IDENTIFIED BY '%(password)s';")
@@ -283,7 +289,7 @@ def create_db():
     import tempfile
     import subprocess
     data = dict(username=options.username,
-                password=options.password.strip('=\n'))
+                password=options.password)
     with tempfile.NamedTemporaryFile(prefix='mysql-',
                                      suffix='.sql') as fd:
             script = script % data
@@ -293,9 +299,8 @@ def create_db():
             p = subprocess.call('cat %s|mysql' % fd.name, shell=True)
             if p > 0:
                 sys.exit(p)
+    print
     print ('MYSQL_URL=mysql://%(username)s:%(password)s@'
            'localhost/%(username)s') % data
-    print 'cat << EOF > ~/.my.cnf'
-    print '[client]'
-    print 'user=%(username)s' % data
-    print 'password=%(password)s' % data
+    print
+    print '[client]\nuser=%(username)s\npassword=%(password)s\n' % data
