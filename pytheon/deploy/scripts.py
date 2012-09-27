@@ -106,8 +106,7 @@ def admin():
             log.info(app_dir)
             os.chdir(app_dir)
             if options.branch and options.branch != 'master':
-                utils.call('git', 'checkout', '-b', options.branch,
-                                  'origin/%s' % options.branch)
+                utils.call('git', 'checkout', options.branch)
         else:
             if options.app_name:
                 utils.call('hg', 'clone', '-q', options.source,
