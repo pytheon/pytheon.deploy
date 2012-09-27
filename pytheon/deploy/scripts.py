@@ -105,6 +105,8 @@ def admin():
             app_dir = guess_app()
             log.info(app_dir)
             os.chdir(app_dir)
+            if not options.branch:
+                options.branch = 'master'
             utils.call('git', 'checkout', options.branch)
         else:
             if options.app_name:
