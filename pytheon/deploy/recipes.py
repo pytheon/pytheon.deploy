@@ -1,6 +1,7 @@
 # -*- coding: utf-8 -*-
 """Recipe deploy"""
 import os
+import sys
 import grp
 import uuid
 import signal
@@ -313,8 +314,8 @@ class Wsgi(Base):
                 scripts='pytheon_wsgi.py=pytheon_wsgi.py',
                 arguments='"%s run as a main module", __file__',
                 extra_paths=extra_paths,
-                eggs=self.options['eggs'] + \
-                     '\npytheon.deploy\nPasteDeploy\nsqlalchemy' + \
+                eggs=self.options['eggs'] +
+                     '\npytheon.deploy\nPasteDeploy\nsqlalchemy' +
                      addons_requires,
                 script_initialization=WSGI_SCRIPT % config,
                 )
@@ -329,6 +330,18 @@ class Wsgi(Base):
                 arguments='%r, (t, t)' % wsgi_script,
                 script_initialization='import time; t = time.time()')
 
+        # bin/backup-db
+        backup_db = os.path.join(
+                os.path.dirname(os.path.abspath(sys.argv[0])),
+                'backup-db')
+        if os.path.isfile(backup_db):
+            self.install_script(
+                name='backup',
+                scripts='backup-db=backup-db',
+                extra_paths='', eggs='',
+                entry_points='backup-db=subprocess:call',
+                arguments='[%r]' % backup_db)
+
         if utils.PY3:
             # add lib dir to extra_paths so cherrypy can find the wsgi script
             dirname = os.path.dirname(wsgi_script)
@@ -338,8 +351,8 @@ class Wsgi(Base):
                     extra_paths=[dirname] + extra_paths,
                     entry_points=('pytheon-serve='
                                   'pytheon.deploy.scripts:cherrypy_serve'),
-                    eggs=self.options['eggs'] + \
-                         '\npytheon.deploy\nPasteDeploy\nsqlalchemy' + \
+                    eggs=self.options['eggs'] +
+                         '\npytheon.deploy\nPasteDeploy\nsqlalchemy' +
                          addons_requires,
                     script_initialization=SERVE % ([config,
                                                     self.options['bind']],)
@@ -354,8 +367,8 @@ class Wsgi(Base):
                     name='gunicorn',
                     scripts='gunicorn=pytheon-serve\nceleryd=celeryd',
                     extra_paths=[dirname] + extra_paths,
-                    eggs=self.options['eggs'] + \
-                         '\npytheon.deploy\ngunicorn\nsqlalchemy' + \
+                    eggs=self.options['eggs'] +
+                         '\npytheon.deploy\ngunicorn\nsqlalchemy' +
                          addons_requires,
                     script_initialization=SERVE % (
                                                 ["-c", gu_config,
@@ -365,8 +378,8 @@ class Wsgi(Base):
                     name='pastescript',
                     scripts='paster=pytheon-serve\nceleryd=celeryd',
                     extra_paths=extra_paths,
-                    eggs=self.options['eggs'] + \
-                         '\npytheon.deploy\nPasteScript\nsqlalchemy' + \
+                    eggs=self.options['eggs'] +
+                         '\npytheon.deploy\nPasteScript\nsqlalchemy' +
                          addons_requires,
                     script_initialization=SERVE % (
                                                 ["serve",
@@ -377,7 +390,7 @@ class Wsgi(Base):
             self.install_script(
                     name='django',
                     scripts='manage',
-                    eggs=self.options['eggs'] + \
+                    eggs=self.options['eggs'] +
                          '\npytheon.deploy\nsqlalchemy' + addons_requires,
                     entry_points='manage=pytheon.deploy.django_utils:manage',
                     extra_paths=extra_paths,
@@ -471,7 +484,7 @@ class Nginx(Wsgi, Supervisor):
         rmtree(www_root)
         locations = []
         if static_paths:
-            static_paths = [p.split('=') for p in static_paths.split('\n') \
+            static_paths = [p.split('=') for p in static_paths.split('\n')
                                          if p.strip() and '=' in p]
             for location, path in static_paths:
                 location = location.strip()
