@@ -67,6 +67,9 @@ lib_dir = %(lib_dir)r
 if os.path.isfile(os.path.join(lib_dir, 'environ.py')):
     execfile(os.path.join(lib_dir, 'environ.py'))
 from pytheon import load_pkg_resources
+os.environ['LOG_DIR'] = %(log_dir)r
+os.environ['RUN_DIR'] = %(run_dir)r
+os.environ['ETC_DIR'] = %(etc_dir)r
 """
 
 BUILDOUT = """
@@ -170,7 +173,7 @@ class Base(object):
                 os.environ[k.upper()] = str(v)
         initialization = self.options.get('initialization', '')
         initialization += INITIALIZATION % dict(environ_string=environ_string,
-                                                lib_dir=self.lib_dir)
+                                                **dirnames)
         self.options['initialization'] = initialization
 
     def log(self, *args):
