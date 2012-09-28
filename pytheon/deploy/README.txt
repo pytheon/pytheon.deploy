@@ -37,7 +37,7 @@ We'll start by creating a buildout that uses the recipe::
 
 Running the buildout gives us::
 
-    >>> print 'start', system(buildout) 
+    >>> print 'start', system(buildout)
     start...
     Installing deploy.
     ...
@@ -52,7 +52,7 @@ Running the buildout gives us::
     application = loadapp("config:" + configfile)
     ...
     <BLANKLINE>
-    
+
     >>> ls('bin')
     -  buildout
     -  paster
@@ -111,7 +111,7 @@ We'll start by creating a buildout that uses the recipe::
 
 Running the buildout gives us::
 
-    >>> print 'start', system(buildout) 
+    >>> print 'start', system(buildout)
     start...
     Installing deploy.
     ...
@@ -143,8 +143,8 @@ We have a ``bin/manage`` script::
     import pytheon.deploy.django_utils
     <BLANKLINE>
     if __name__ == '__main__':
-        pytheon.deploy.django_utils.manage('/sample-buildout/parts/deploy/etc/deploy.ini')
-    
+        sys.exit(pytheon.deploy.django_utils.manage('/sample-buildout/parts/deploy/etc/deploy.ini'))
+
 And a ``touch-wsgi`` script::
 
     >>> cat('bin', 'touch-wsgi')
@@ -152,8 +152,8 @@ And a ``touch-wsgi`` script::
     import time; t = time.time()
     ...
     if __name__ == '__main__':
-        os.utime('/sample-buildout/parts/deploy/lib/pytheon_wsgi.py', (t, t))
-    
+        sys.exit(os.utime('/sample-buildout/parts/deploy/lib/pytheon_wsgi.py', (t, t)))
+
 Requirement file
 =================
 
@@ -198,7 +198,7 @@ We'll start by creating a buildout that uses the recipe::
 
 Running the buildout gives us::
 
-    >>> print 'start', system(buildout + ' -v') 
+    >>> print 'start', system(buildout + ' -v')
     start...
     Installing deploy.
     ...

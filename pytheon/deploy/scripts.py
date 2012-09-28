@@ -37,15 +37,20 @@ def admin():
                       action="store", default=sys.executable,
                       help='Default to: ' + sys.executable)
     parser.add_option("-d", "--deploy", dest="source",
-                      action="store")
+                      action="store", metavar='SOURCE',
+                      default=os.environ.get('SOURCE', None),
+                      help='Default to $SOURCE if exist.')
     parser.add_option("-b", "--branch", dest="branch",
-                      action="store")
+                      action="store",
+                      default=os.environ.get('BRANCH', None),
+                      help='Default to $BRANCH if exist')
     parser.add_option("-a", "--app-name", dest="app_name",
                       action="store", default=None)
     parser.add_option("--destroy", dest="destroy",
                       action="store")
     parser.add_option("--host", dest="host",
-                      action="append", default=[])
+                      action="append",
+                      default=os.environ.get('HOSTS', '').split(';'))
     parser.add_option("-r", "--root", dest="root",
                       action="store", default=root,
                       help='Default to %s' % root)
@@ -53,7 +58,10 @@ def admin():
                       action="store", default=os.path.expanduser('~/eggs'),
                       help='Default to: ' + os.path.expanduser('~/eggs'))
     parser.add_option("--develop", dest="develop",
-                      action="append", default=[])
+                      action="append", default=[], help="Testing only")
+    parser.add_option("--develop-dir", dest="develop_dir",
+                      help=("Used for buildout:develop-dir. "
+                            "Default to $DEVELOP_DIR if exist"))
 
     (options, args) = parser.parse_args()
 
@@ -146,6 +154,8 @@ def admin():
     config.buildout.develop = options.develop
     config.deploy.recipe = 'pytheon.deploy'
     config.deploy['deploy-dir'] = root
+    if options.develop_dir:
+        config.deploy['develop-dir'] = options.develop
     if options.host:
         config.deploy.host = options.host
     config.deploy.environ = ['PYTHEON=1', 'PRODUCTION=1'] + list(args)
