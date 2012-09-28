@@ -156,7 +156,7 @@ def admin():
     config.deploy.recipe = 'pytheon.deploy'
     config.deploy['deploy-dir'] = root
     if options.develop_dir:
-        config.deploy['develop-dir'] = options.develop
+        config.buildout['develop-dir'] = options.develop
     if options.host:
         config.deploy.host = options.host
     config.deploy.environ = ['PYTHEON=1', 'PRODUCTION=1'] + list(args)
