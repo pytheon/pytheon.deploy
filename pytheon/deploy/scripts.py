@@ -60,6 +60,7 @@ def admin():
     parser.add_option("--develop", dest="develop",
                       action="append", default=[], help="Testing only")
     parser.add_option("--develop-dir", dest="develop_dir",
+                      default=os.environ.get('DEVELOP_DIR', None),
                       help=("Used for buildout:develop-dir. "
                             "Default to $DEVELOP_DIR if exist"))
 
