@@ -8,6 +8,8 @@ def django_settings(config):
     import settings
     os.environ['DJANGO_SETTINGS_MODULE'] = 'settings'
 
+    DATABASES = getattr(settings, 'DATABASES', {})
+    DATABASES_OPTIONS = DATABASES.get('default', {}).get('OPTIONS', {})
     DATABASES = {}
     CACHES = getattr(settings, 'CACHES', {})
 
@@ -26,6 +28,7 @@ def django_settings(config):
                 'PASSWORD': url.password,
                 'HOST': url.host,
                 'PORT': url.port,
+                'OPTIONS': DATABASES_OPTIONS,
             }
         }
 
