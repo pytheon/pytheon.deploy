@@ -8,6 +8,8 @@ allow-hosts =
     *.python.org
     *.pytheon.net
     *.bearstech.com
+    *.github.com
+    *.bitbucket.org
     code.google.com
     *.googlecode.com
 find-links=http://pypi.bearstech.com/build/
