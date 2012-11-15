@@ -165,7 +165,8 @@ def admin():
         config.buildout.requirements = 'requirements.txt'
 
     extends = []
-    for filename in ('buildout.cfg', 'deploy-%s.ini' % app_name, 'deploy.ini'):
+    for filename in ('buildout.cfg', 'versions.cfg',
+                     'deploy-%s.ini' % app_name, 'deploy.ini'):
         filename = utils.realpath(os.getcwd(), filename)
         if os.path.isfile(filename):
             extends.append(filename)
