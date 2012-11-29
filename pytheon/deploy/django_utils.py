@@ -20,6 +20,8 @@ def django_settings(config):
         drivername = url.drivername
         if drivername == 'sqlite':
             drivername = 'sqlite3'
+        elif drivername.startswith('postgres'):
+            drivername = 'postgresql_psycopg2'
         DATABASES = {
             'default': {
                 'ENGINE': 'django.db.backends.%s' % drivername,
