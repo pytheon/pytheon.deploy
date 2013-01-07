@@ -201,7 +201,7 @@ script-initialization =
     os.environ['PYTHEON_EGGS_DIR'] = os.environ['PYTHON_EGGS'] = %(PYTHEON_EGGS_DIR)r
 entry-points =
     pytheon-upgrade=zc.buildout.buildout:main
-arguments = ['-c', %(buildout)r]
+arguments = ['-c', %(buildout)r] + ['pytheon:eggs+=' + a for a in sys.argv[1:]]
 scripts = pytheon-upgrade
 
 [pytheon]
