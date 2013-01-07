@@ -1,7 +1,6 @@
 # -*- coding: utf-8 -*-
+__doc__ = """Monkey patch sys.path to take care of some extra directories"""
 import os
-import logging
-import pkg_resources
 import zc.buildout.buildout
 import zc.buildout.easy_install
 from pytheon.deploy import log

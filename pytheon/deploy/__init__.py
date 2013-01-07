@@ -5,6 +5,8 @@ from pytheon import utils
 from os.path import join
 import os
 
+__doc__ = '''This module is onl used to share a global configuration'''
+
 __all__ = ('CONFIG', 'Config', 'utils', 'log')
 
 ETC_DIR = os.path.join(os.environ.get('PYTHEON_PREFIX', '/'), 'etc', 'pytheon')

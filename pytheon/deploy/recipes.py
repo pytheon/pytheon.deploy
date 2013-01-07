@@ -92,6 +92,8 @@ if 'pytheon-serve' in sys.argv[0]:
 
 
 def safe_options(func):
+    """A decorator to be able to modify some configuration option but restore
+    them when it's done"""
     def wrapper(self, *args, **kwargs):
         self.log('running %s', getattr(func, 'func_name',
                                getattr(func, '__name__', '')))
@@ -236,9 +238,11 @@ class Base(object):
 
 
 class Wsgi(Base):
+    """Install a wsgi application"""
 
     @property
     def config(self):
+        """return a valid deploy section extracted from project's ini files"""
         deploy = join(self.etc_dir, 'deploy.ini')
         current = Config.from_file(deploy)
 
@@ -285,6 +289,7 @@ class Wsgi(Base):
         return deploy
 
     def install_wsgi(self):
+        """Install a wsgi application and scripts. Take care of django"""
         eggs = Scripts(self.buildout, self.options['recipe'], self.options)
         reqs, ws = eggs.working_set()
 
@@ -415,6 +420,7 @@ class Wsgi(Base):
 
 
 class Supervisor(Base):
+    """Install supervisord"""
 
     def install_supervisor(self, programs=None):
 
@@ -467,6 +473,7 @@ class Supervisor(Base):
 
 
 class Apache(Wsgi):
+    """Create some vhost files for apache2"""
 
     def install(self):
         self.install_wsgi()
@@ -477,6 +484,7 @@ class Apache(Wsgi):
 
 
 class Nginx(Wsgi, Supervisor):
+    """Create some vhost files for nginx"""
 
     def install_nginx_config(self):
         static_paths = self.options.get('static_paths', '').strip()
@@ -511,6 +519,8 @@ class Nginx(Wsgi, Supervisor):
 
 
 class Deploy(Nginx):
+    """Install a wsgi application, initialize supervisord configuration and
+    nginx/apache vhosts"""
 
     def install(self):
         self.install_wsgi()

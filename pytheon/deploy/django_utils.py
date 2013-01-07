@@ -5,6 +5,8 @@ from pytheon.utils import engine_from_config
 
 
 def django_settings(config):
+    """return django's settings with modified values extracted from environ to
+    set a correct database/cache backends"""
     import settings
     os.environ['DJANGO_SETTINGS_MODULE'] = 'settings'
 
@@ -68,6 +70,7 @@ def django_settings(config):
 
 
 def patch_file_storage():
+    # not used
     from django.core.files import storage
     import urlparse
 
@@ -95,6 +98,7 @@ def patch_file_storage():
 
 
 def manage(config):
+    """django's manage wrapper to take care of the configuration"""
     from pytheon.utils import Config
     config = Config.from_file(config)
     config = dict(config['app:main'].items())
@@ -104,6 +108,7 @@ def manage(config):
 
 
 def make_django(global_config, **config):
+    """a django wsgi application which take care of the configuration"""
     settings = django_settings(config)
     setattr(settings, 'DEBUG', False)
     setattr(settings, 'TEMPLATE_DEBUG', False)
