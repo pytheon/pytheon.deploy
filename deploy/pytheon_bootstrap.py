@@ -250,9 +250,5 @@ for r in requirements:
     ws.require(r)
 
 import zc.buildout.buildout
-os.chdir(os.path.dirname(buildout))
-zc.buildout.buildout.main(['bootstrap'])
-
 os.chdir(prefix)
-subprocess.Popen(['bin/buildout', '-c', buildout]).wait()
-
+zc.buildout.buildout.main(['-c', buildout])
