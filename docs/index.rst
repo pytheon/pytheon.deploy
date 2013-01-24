@@ -18,5 +18,3 @@ Contents
    configuration.rst
    deploy.rst
 
-.. _bootstrap: https://raw.github.com/pytheon/pytheon.deploy/master/deploy/pytheon_bootstrap.py
-.. _available files: https://github.com/pytheon/pytheon.deploy/tree/master/deploy

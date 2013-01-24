@@ -41,3 +41,6 @@ By default this will download eggs for the python versions of the interpreter
 used to bootstrap pytheon but you can use a different one or more than one::
 
   $ bin/build-eggs -i 2.6 -i 3.2
+
+.. _bootstrap: https://raw.github.com/pytheon/pytheon.deploy/master/deploy/pytheon_bootstrap.py
+.. _available files: https://github.com/pytheon/pytheon.deploy/tree/master/deploy
