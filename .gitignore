@@ -1,3 +1,10 @@
 src/
 .coverage
 *py3k*
+*.pyc
+pytheon.deploy.egg-info/
+bin/
+develop-eggs/
+docs/_build/
+.installed.cfg
+.vagrant

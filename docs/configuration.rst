@@ -1,6 +1,6 @@
-============================================
+=========================
 Application configuration
-============================================
+=========================
 
 Pytheon can deploy any python application with only a few modification
 
@@ -11,7 +11,7 @@ Add a deploy.ini with a deploy section like this:
     [deploy]
 
 Django based application
-=========================
+========================
 
 You need to point your settings.py in the deploy.ini file:
 
@@ -37,6 +37,8 @@ You can add deps as usual:
     [deploy]
     eggs =
         pyramid
+
+.. Note:: You can use this sample application : https://github.com/pytheon/sample_buildout
 
 Handling static files
 =====================

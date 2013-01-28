@@ -17,4 +17,4 @@ Contents
    install.rst
    configuration.rst
    deploy.rst
-
+   vagrant.rst
