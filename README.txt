@@ -1,17 +1,9 @@
-.. contents::
+==============
+pytheon.deploy
+==============
 
-.. Note to recipe author!
-   ---------------------
-   Update the following URLs to point to your:
-   
-   - code repository
-   - bug tracker 
-   - questions/comments feedback mail 
-   (do not set a real mail, to avoid spams)
+pytheon.deploy allow you to build an hosting environment for shared server.
 
-   Or remove it if not used.
+The idea is to use a single command to deploy all your python applications.
 
-- Code repository: http://svn.somewhere.com/...
-- Questions and comments to somemailing_list
-- Report bugs at http://bug.somewhere.com/..
-
+More info see `online documentation <https://pytheondeploy.readthedocs.org/>`_

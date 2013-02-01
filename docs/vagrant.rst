@@ -49,11 +49,47 @@ Download and start *vagrant* VM :
 
     $ vagrant up
 
+Execute *fabric* command :
+
+.. code-block:: sh
+
+    $ bin/fab vagrant install_pytheon
+
+.. Note:: 
+
+    By default, ``install_pytheon`` use ``pytheon_bootstrap.py`` located in current working copy ``../deploy`` folder.
+
+    If you want to use remote version ``https://raw.github.com/pytheon/pytheon.deploy/master/deploy/pytheon_bootstrap.py`` you can use this command :
+
+    .. code-block:: sh
+
+        $ bin/fab vagrant remote_bootstrap install_pytheon
+
+      
+Deploy *sample_buildout*
+========================
+
 Execute *fabric* install :
 
 .. code-block:: sh
 
     $ bin/fab vagrant install_pytheon
+
+Execute *fabric* command :
+
+.. code-block:: sh
+
+    $ bin/fab vagrant install_sample_buildout
+
+.. Note:: 
+
+    By default, ``install_sample_buildout`` use ``sample_buildout`` located ``src/sample_buildout`` folder.
+
+    If you want to use remote version ``git@github.com:pytheon/sample_buildout.git`` you can use this command :
+
+    .. code-block:: sh
+
+        $ bin/fab vagrant remote_sample_buildout install_sample_buildout
 
 
 Uninstall Pytheon in vagrant VM

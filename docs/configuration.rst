@@ -10,6 +10,7 @@ Add a deploy.ini with a deploy section like this:
 
     [deploy]
 
+
 Django based application
 ========================
 
@@ -20,10 +21,12 @@ You need to point your settings.py in the deploy.ini file:
     [deploy]
     settings = myapp/settings.py
 
+
 pip based application
 =====================
 
-If your project contain a ``requirements.txt`` then pytheon will use it to fetch dependencies
+If your project contain a ``requirements.txt`` then pytheon will use it to fetch dependencies.
+
 
 Buildout based applications
 ===========================
@@ -39,6 +42,7 @@ You can add deps as usual:
         pyramid
 
 .. Note:: You can use this sample application : https://github.com/pytheon/sample_buildout
+
 
 Handling static files
 =====================

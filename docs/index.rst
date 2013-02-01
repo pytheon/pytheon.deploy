@@ -18,3 +18,5 @@ Contents
    configuration.rst
    deploy.rst
    vagrant.rst
+   tips.rst
+   contribute.rst

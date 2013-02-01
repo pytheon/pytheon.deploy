@@ -1,5 +1,1 @@
-0.1 (xxxx-xx-xx)
-----------------
-
-- Created recipe with ZopeSkel
-  [Bearstech]
+See https://github.com/pytheon/pytheon.deploy/commits/master

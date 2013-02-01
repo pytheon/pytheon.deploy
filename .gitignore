@@ -8,3 +8,6 @@ develop-eggs/
 docs/_build/
 .installed.cfg
 .vagrant
+.parts/
+eggs/
+parts/
