@@ -1,9 +1,11 @@
 # -*- coding: utf-8 -*-
 from pytheon.utils import Config
-from pytheon.utils import log # NOQA
+from pytheon.utils import log  # NOQA
 from pytheon import utils
 from os.path import join
 import os
+
+__version__ = '0.1.0-dev'
 
 __doc__ = '''This module is onl used to share a global configuration'''
 
@@ -22,15 +24,18 @@ if not EGGS_DIR:
 
 if not EGGS_DIR or not os.path.isdir(EGGS_DIR):
     cfg = Config.from_file(
-                os.path.expanduser(join('~', '.buildout', 'default.cfg')))
+        os.path.expanduser(join('~', '.buildout', 'default.cfg'))
+    )
     EGGS_DIR = cfg.buildout['eggs-directory'] or None
 
 if not EGGS_DIR or not os.path.isdir(EGGS_DIR):
     raise OSError("Can't find pytheon eggs directory")
 
-defaults = dict([('default_%s' % k[8:].lower(), v)
-                    for k, v in os.environ.items()
-                        if k.startswith('PYTHEON_')])
+defaults = dict([
+    ('default_%s' % k[8:].lower(), v)
+    for k, v in os.environ.items()
+    if k.startswith('PYTHEON_')
+])
 defaults['here'] = ETC_DIR
 defaults['default_eggs_dir'] = EGGS_DIR
 os.environ['PYTHON_EGGS'] = EGGS_DIR

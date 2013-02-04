@@ -6,16 +6,20 @@ import shutil
 import logging
 from glob import glob
 from os.path import join
+
 from optparse import OptionParser
+
 from pytheon.deploy import CONFIG
 from pytheon.deploy import Config
 from pytheon import utils
+
+from pytheon.deploy import __version__ as version
 
 logging.basicConfig(stream=sys.stdout, level=logging.DEBUG)
 
 log = utils.log
 
-parser = OptionParser()
+parser = OptionParser(version=version)
 
 
 def cherrypy_serve():
@@ -24,8 +28,9 @@ def cherrypy_serve():
     host, port = bind_addr.split(':')
     bind_addr = (host, int(port))
     from pytheon_wsgi import application
-    server = wsgiserver3.CherryPyWSGIServer(bind_addr, application,
-                                           server_name='cherrypy')
+    server = wsgiserver3.CherryPyWSGIServer(
+        bind_addr, application, server_name='cherrypy'
+    )
     server.start()
 
 
@@ -107,8 +112,10 @@ def admin():
         # .git url or local path are git repositories
         if options.source.endswith('.git') or options.source.startswith('/'):
             if options.app_name:
-                utils.call('git', 'clone', '-q', options.source,
-                                                 options.app_name)
+                utils.call(
+                    'git', 'clone', '-q', options.source,
+                    options.app_name
+                )
             else:
                 utils.call('git', 'clone', '-q', options.source)
             app_dir = guess_app()
@@ -119,8 +126,10 @@ def admin():
             utils.call('git', 'checkout', options.branch)
         else:
             if options.app_name:
-                utils.call('hg', 'clone', '-q', options.source,
-                                                options.app_name)
+                utils.call(
+                    'hg', 'clone', '-q', options.source,
+                    options.app_name
+                )
             else:
                 utils.call('hg', 'clone', '-q', options.source)
             app_dir = guess_app()

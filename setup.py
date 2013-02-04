@@ -2,11 +2,16 @@
 """
 This module contains the tool of pytheon.deploy
 """
-import os
-import sys
+import os, sys, re
 from setuptools import setup, find_packages
 
 PY3 = sys.version_info[0] == 3
+
+here = os.path.abspath(os.path.dirname(__file__))
+
+v = open(os.path.join(here, 'pytheon', 'deploy', '__init__.py'))
+version = re.compile(r".*__version__ = '(.*?)'", re.S).match(v.read()).group(1)
+v.close()
 
 
 def read(*rnames):
@@ -14,8 +19,6 @@ def read(*rnames):
     if os.path.isfile(filename):
         return open(filename).read()
     return ''
-
-version = '0.1.0'
 
 if PY3:
     tests_require = ['zope.testing', 'zc.buildout']
