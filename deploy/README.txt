@@ -5,4 +5,8 @@ The versions.cfg and dev-versions.cfg are used by pytheon_bootstrap.py to downlo
 
 Example::
 
-    $ curl -O https://raw.github.com/pytheon/pytheon.deploy/master/deploy/pytheon_bootstrap.py --branch=dev
+    $ curl -O https://raw.github.com/pytheon/pytheon.deploy/master/deploy/pytheon_bootstrap.py
+    $ PREFIX=/opt/pytheon
+    $ mkdir $PREFIX
+    $ cd $PREFIX
+    $ python pytheon_bootstrap.py --branch=dev
