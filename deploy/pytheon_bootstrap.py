@@ -18,7 +18,7 @@ The script accepts buildout command-line options, so you can
 use the -c option to specify an alternate configuration file.
 """
 
-import os, shutil, sys, tempfile, urllib, urllib2, subprocess
+import os, sys, urllib, urllib2, subprocess
 from optparse import OptionParser
 
 if sys.platform == 'win32':
@@ -57,13 +57,17 @@ if not has_broken_dash_S and 'site' in sys.modules:
 # out any namespace packages from site-packages that might have been
 # loaded by .pth files.
 clean_path = sys.path[:]
-import site  # imported because of its side effects
+import site  # imported because of its side effects  # NOQA
 sys.path[:] = clean_path
 for k, v in sys.modules.items():
-    if k in ('setuptools', 'pkg_resources') or (
-        hasattr(v, '__path__') and
-        len(v.__path__) == 1 and
-        not os.path.exists(os.path.join(v.__path__[0], '__init__.py'))):
+    if (
+        (k in ('setuptools', 'pkg_resources')) or
+        (
+            hasattr(v, '__path__') and
+            len(v.__path__) == 1 and
+            not os.path.exists(os.path.join(v.__path__[0], '__init__.py'))
+        )
+    ):
         # This is a namespace package.  Remove it.
         sys.modules.pop(k)
 
@@ -105,6 +109,9 @@ parser.add_option("--extend", dest="extends",
 parser.add_option("-r", "--requirements", dest="requirements",
                   action='append', default=['zc.buildout', 'pytheon.deploy'],
                   help="a set of requirements")
+parser.add_option("--branch", dest="branch",
+                  default='master',
+                  help="Select the branch version to install. Default value : 'master'")
 
 options, args = parser.parse_args()
 
@@ -161,7 +168,7 @@ env = dict(
 
 requirements = [
     'zc.buildout',
-    ]
+]
 cmd.extend(requirements)
 
 
@@ -175,16 +182,18 @@ if exitcode != 0:
            "were output by easy_install.")
     sys.exit(exitcode)
 
-
-
 os.environ['PYTHEON_PREFIX'] = prefix
 os.environ['PYTHEON_EGGS_DIR'] = eggs_dir
+
+version_filename = 'versions.cfg'
+if options.branch != 'master':
+    version_filename = options.branch + '-versions.cfg'
 
 buildout = os.path.join(lib_dir, 'buildout.cfg')
 open(buildout, 'w').write('''
 [buildout]
 parts = bootstrap pytheon
-extends = https://raw.github.com/pytheon/pytheon.deploy/master/deploy/versions.cfg
+extends = https://raw.github.com/pytheon/pytheon.deploy/%(branch)s/deploy/%(version_filename)s
 eggs-directory = %(PYTHEON_EGGS_DIR)s
 bin-directory = %(PYTHEON_PREFIX)s/bin
 parts-directory = %(lib_dir)s/parts
@@ -213,21 +222,34 @@ initialization =
     import os
     os.environ['PYTHEON_PREFIX'] = %(PYTHEON_PREFIX)r
     os.environ['PYTHEON_EGGS_DIR'] = os.environ['PYTHON_EGGS'] = %(PYTHEON_EGGS_DIR)r
-''' % dict(os.environ, lib_dir=lib_dir, buildout=buildout,
-           reqs='\n    '.join(options.requirements),
-           extends='' #'\n    '.join(extends),
-           ))
+''' % dict(
+    os.environ,
+    lib_dir=lib_dir,
+    buildout=buildout,
+    reqs='\n    '.join(options.requirements),
+    branch=options.branch,
+    extends='',  # '\n    '.join(extends),
+    version_filename=version_filename
+))
 
 extends = [
     'http://download.zope.org/zopetoolkit/index/1.1/ztk-versions.cfg',
-    'https://raw.github.com/pytheon/pytheon.deploy/master/deploy/versions.cfg',
-    ]
+    'https://raw.github.com/pytheon/pytheon.deploy/%(branch)s/deploy/%(version_filename)s' % {
+        'branch': options.branch,
+        'version_filename': version_filename
+    }
+]
 
 if options.extends:
     if options.extends.startswith('http://'):
         extends.append(options.extends)
     else:
-        extends.append('https://raw.github.com/pytheon/pytheon.deploy/master/deploy/%s.cfg' % options.extends)
+        extends.append(
+            'https://raw.github.com/pytheon/pytheon.deploy/%(branch)s/deploy/%(extends)s.cfg' % {
+                'branch': options.branch,
+                'extends': options.extends
+            }
+        )
 
 etc_dir = os.path.join(prefix, 'etc', 'pytheon')
 if not os.path.isdir(etc_dir):
