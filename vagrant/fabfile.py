@@ -47,7 +47,7 @@ def master():
 
 @task
 def install_pytheon():
-    require.deb.packages(['python2.6', 'build-essential', 'git', 'curl'])
+    require.deb.packages(['python2.6', 'python2.6-dev', 'build-essential', 'git', 'curl'])
     require.user('pytheon', home='/var/lib/pytheon', shell='/bin/bash')
     if not fabtools.files.is_dir('/var/lib/pytheon/.ssh'):
         run('mkdir -p /var/lib/pytheon/.ssh')
