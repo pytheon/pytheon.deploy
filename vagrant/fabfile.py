@@ -19,6 +19,14 @@ def vagrant(name=''):
     env['branch'] = 'master'
 
 
+def _add_user(*args, **kwargs):
+    require.user(*args, **kwargs)
+    user = kwargs.get('user', args[0])
+    if not fabtools.files.is_file('/home/%s/.ssh/authorized_keys' % user):
+        run('mkdir -p /home/%s/.ssh/' % user)
+        run('cp /root/.ssh/authorized_keys /home/%s/.ssh/' % user)
+
+
 @task
 def remote_bootstrap():
     env['use_remote_bootstrap'] = True
@@ -48,13 +56,13 @@ def master():
 @task
 def install_pytheon():
     require.deb.packages(['python2.6', 'python2.6-dev', 'build-essential', 'git', 'curl'])
-    require.user('pytheon', home='/var/lib/pytheon', shell='/bin/bash')
+    _add_user('pytheon', home='/var/lib/pytheon', shell='/bin/bash')
     if not fabtools.files.is_dir('/var/lib/pytheon/.ssh'):
         run('mkdir -p /var/lib/pytheon/.ssh')
         run('cp -f /root/.ssh/authorized_keys /var/lib/pytheon/.ssh')
         run("chown -R pytheon:pytheon /var/lib/pytheon/.ssh")
 
-    with settings(name='pytheon'):
+    with settings(user='pytheon'):
         with cd('/var/lib/pytheon'):
             if not fabtools.files.is_file('pytheon_bootstrap.py'):
                 if env.get('use_remote_bootstrap', False):
@@ -75,15 +83,15 @@ def install_pytheon():
 
 @task
 def upgrade_pytheon():
-    with settings(name='pytheon'):
+    with settings(user='pytheon'):
         with cd('/var/lib/pytheon'):
             run('/var/lib/pytheon/bin/pytheon-upgrade')
 
 
 @task
 def install_sample_buildout():
-    require.user('user1', create_home=True, shell='/bin/bash')
-    with settings(name='user1'):
+    _add_user('user1', create_home=True, shell='/bin/bash')
+    with settings(user='user1'):
         files.append(
             '/home/user1/.bashrc',
             'export PYTHEON_ADMIN=/var/lib/pytheon/bin/pytheon-admin'
