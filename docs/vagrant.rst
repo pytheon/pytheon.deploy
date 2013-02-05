@@ -49,11 +49,12 @@ Download and start *vagrant* VM :
 
     $ vagrant up
 
-Execute *fabric* command :
+Execute *fabric* command (here ``master`` branch is selected but you can also select ``dev`` branch) :
 
 .. code-block:: sh
 
-    $ bin/fab vagrant install_pytheon
+    $ bin/fab vagrant master install_pytheon
+
 
 .. Note:: 
 
@@ -69,11 +70,7 @@ Execute *fabric* command :
 Deploy *sample_buildout*
 ========================
 
-Execute *fabric* install :
-
-.. code-block:: sh
-
-    $ bin/fab vagrant install_pytheon
+Before deploy *sample_buildout* you need to install pytheon (``bin/fab vagrant install_pytheon``)
 
 Execute *fabric* command :
 
@@ -83,7 +80,7 @@ Execute *fabric* command :
 
 .. Note:: 
 
-    By default, ``install_sample_buildout`` use ``sample_buildout`` located ``src/sample_buildout`` folder.
+    By default, ``install_sample_buildout`` use ``sample_buildout`` located ``vagrant/src/sample_buildout`` folder.
 
     If you want to use remote version ``git@github.com:pytheon/sample_buildout.git`` you can use this command :
 
