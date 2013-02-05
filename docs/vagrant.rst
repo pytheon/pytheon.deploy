@@ -97,3 +97,13 @@ You can uninstall Pytheon with this command :
 .. code-block:: sh
 
     $ bin/fab vagrant uninstall_pytheon
+
+
+Uninstall *sample_buildout*
+===========================
+
+You can uninstall *sample_buildout* with this command :
+
+.. code-block:: sh
+
+    $ bin/fab vagrant uninstall_sample_buildout
