@@ -439,9 +439,10 @@ class Supervisor(Base):
                                                          'celeryd'))
 
         if programs:
-            config = self.install_config('supervisor.conf', programs=programs)
+            config = self.install_config('app-supervisor.conf', programs=programs)
+            config = self.install_config('supervisor.conf', include_file=config)
         else:
-            config = self.install_config('supervisor.conf')
+            config = self.install_config('supervisor.conf', include_file=None)
 
         self.install_script(
                 name='supervisor',

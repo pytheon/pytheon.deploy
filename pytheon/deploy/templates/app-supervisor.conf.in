@@ -1,0 +1,10 @@
+{% for i, program in enumerate([p.split('=') for p in options.programs.split('\n') if p.strip() and '=' in p]) %}
+[program:${program[0].strip()}]
+priority = ${i}
+process_name = ${program[0].strip()}
+command = ${program[1].strip()}
+directory = ${options.curdir}
+autostart = ${options.get('autostart', 'true')}
+autorestart = ${options.get('autorestart', 'true')}
+redirect_stderr = ${options.get('redirect-stderr', 'true')}
+{% end for %}

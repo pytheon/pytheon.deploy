@@ -74,6 +74,41 @@ Running the buildout gives us::
     >>> ls('parts', 'deploy', 'var', 'www')
     d  static
 
+    >>> ls('parts', 'deploy', 'etc')
+    -  apache.conf
+    -  app-supervisor.conf
+    -  deploy.ini
+    -  gunicorn_config.py
+    -  http_port.txt
+    -  nginx.conf
+    -  supervisor.conf
+
+    >>> cat('parts', 'deploy', 'etc', 'app-supervisor.conf')
+    <BLANKLINE>
+    [program:server]
+    priority = 0
+    process_name = server
+    command = .../bin/pytheon-serve
+    directory = ...
+    autostart = true
+    autorestart = true
+    redirect_stderr = true
+    <BLANKLINE>
+
+    >>> cat('parts', 'deploy', 'etc', 'supervisor.conf')
+    [unix_http_server]
+    ...
+    [supervisord]
+    ...
+    [supervisorctl]
+    ...
+    [rpcinterface:supervisor]
+    ...
+    [include]
+    files = 
+        .../deploy/etc/app-supervisor.conf
+    <BLANKLINE>
+
 Django Apps
 =============
 
@@ -122,7 +157,6 @@ Running the buildout gives us::
     ...
     [app:main]
     paste.app_factory = pytheon.deploy.django_utils:make_django
-    ...
     <BLANKLINE>
 
     >>> ls('bin')
