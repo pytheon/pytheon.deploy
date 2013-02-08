@@ -39,6 +39,13 @@ Install Python dependencies (fabric…) with *buildout* :
     $ python bootstrap.py
     $ bin/buildout
 
+Install this vagrant plugin, `vagrant-hostmaster <https://github.com/mosaicxm/vagrant-hostmaster>`_  to
+manage ``/etc/hosts`` entries on both the host OS and guest VMs.
+
+.. code-block:: sh
+
+    $ vagrant gem install vagrant-hostmaster
+    
 
 Install pytheon in vagrant VM
 =============================
@@ -87,6 +94,18 @@ Execute *fabric* command :
     .. code-block:: sh
 
         $ bin/fab vagrant remote_sample_buildout install_sample_buildout
+
+
+``install_sample_buildout`` task install *sample_buildout* application in ``/home/user1/root/``.
+
+You can test that ``sample_builout`` is well started.
+
+.. code-block:: sh
+
+    $ curl http://example.com
+    Hello world!
+    
+It's work !
 
 
 Uninstall Pytheon in vagrant VM

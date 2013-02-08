@@ -3,8 +3,10 @@ import os
 from fabric.api import task, env, run, settings, cd, open_shell, put
 from fabric.contrib import files
 from fabric.contrib.project import upload_project
-from fabtools.vagrant import ssh_config, _settings_dict
+
 import fabtools  # NOQA
+from fabtools.vagrant import ssh_config, _settings_dict
+from fabtools.require.service import started
 from fabtools import require
 
 here = os.path.abspath(os.path.dirname(__file__))
@@ -55,7 +57,8 @@ def master():
 
 @task
 def install_pytheon():
-    require.deb.packages(['python2.6', 'python2.6-dev', 'build-essential', 'git', 'curl'])
+    require.deb.packages(['python2.6', 'python2.6-dev', 'build-essential', 'git', 'curl', 'nginx'])
+    require.nginx.site_disabled('default')
     _add_user('pytheon', home='/var/lib/pytheon', shell='/bin/bash')
     if not fabtools.files.is_dir('/var/lib/pytheon/.ssh'):
         run('mkdir -p /var/lib/pytheon/.ssh')
@@ -97,7 +100,7 @@ def install_sample_buildout():
             'export PYTHEON_ADMIN=/var/lib/pytheon/bin/pytheon-admin'
         )
         if env.get('remote_sample_buildout', False):
-            run(  # TODO use $PYTHEON_ADMIN here
+            run(
                 '/var/lib/pytheon/bin/pytheon-admin -d https://github.com/pytheon/sample_buildout.git --host=example.com'
             )
         else:
@@ -106,9 +109,13 @@ def install_sample_buildout():
                 os.path.join(here, 'src/sample_buildout/'),
                 '/tmp/'
             )
-            run(  # TODO use $PYTHEON_ADMIN here
+            run(
                 '/var/lib/pytheon/bin/pytheon-admin -d /tmp/sample_buildout --host=example.com'
             )
+        run('/home/user1/root/sample_buildout/bin/pytheond')
+
+    require.nginx.site_enabled('sample_buildout', '/home/user1/root/etc/nginx.conf')
+    started('nginx')
 
 
 @task
@@ -124,4 +131,4 @@ def uninstall_sample_buildout():
 
 @task
 def install_develop_tools():
-    require.deb.packages(['vim', 'mc', 'tree', 'curl'])
+    require.deb.packages(['vim', 'mc', 'tree', 'curl', 'links'])
