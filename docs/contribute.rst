@@ -54,3 +54,48 @@ Download ``pytheon_bootstrap.py`` in **dev** branch and use ``--branch`` paramet
 
 This command install the *dev* branch of `pytheon <https://github.com/pytheon/pytheon/tree/dev>`_ and 
 `pytheon.deploy <https://github.com/pytheon/pytheon.deploy/tree/dev>`_ repositories.
+
+
+Develop in vagrant
+==================
+
+| If you are on Mac OSX system, it's difficult to contribute to *pythen.deploy*.
+| But you can working in Vagrant environment.
+
+First, read and execute « :ref:`pytheon-vagrant-installation` » section.
+
+After Vagrant VM started.
+
+Install some devlopment tools :
+
+.. code-block:: sh
+
+    $ bin/fab vagrant install_develop_tools
+
+Connect you via ssh :
+
+.. code-block:: plain
+
+    $ vagrant ssh
+    vagrant@pytheon:~$ tree -L 3
+    .
+    └── projects
+        └── pytheon.deploy
+            ├── bootstrap.py
+            ├── buildout.cfg
+            ├── CHANGES.txt
+            ├── clean.sh
+            ├── CONTRIBUTORS.txt
+            ├── deploy
+            ├── docs
+            ├── etc
+            ├── MANIFEST.in
+            ├── pytheon
+            ├── README.txt
+            ├── requirements.txt
+            ├── setup.cfg
+            ├── setup.py
+            └── vagrant
+
+You have access to *pytheon.deploy* project in Vagrant VM, you can always edit *pytheon.deploy* source
+code from your Host, with your favorite text editor.

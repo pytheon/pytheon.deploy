@@ -19,11 +19,12 @@ Prerequisites :
 
     $ sudo apt-get install virtualbox rubygem1.8
 
+.. _pytheon-vagrant-installation:
 
 Pytheon vagrant installation environment
 ========================================
 
-Fetch `pytheon.deploy <https://github.com/pytheon/pytheon.deploy>`_
+First, clone `pytheon.deploy <https://github.com/pytheon/pytheon.deploy>`_ :
 
 .. code-block:: sh
 
@@ -46,15 +47,15 @@ manage ``/etc/hosts`` entries on both the host OS and guest VMs.
 
     $ vagrant gem install vagrant-hostmaster
     
-
-Install pytheon in vagrant VM
-=============================
-
 Download and start *vagrant* VM :
 
 .. code-block:: sh
 
     $ vagrant up
+
+
+Install pytheon in vagrant VM
+=============================
 
 Execute *fabric* command (here ``master`` branch is selected but you can also select ``dev`` branch) :
 
