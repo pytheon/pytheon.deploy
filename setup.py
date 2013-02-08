@@ -50,6 +50,9 @@ else:
         'SQLAlchemy',
         'gunicorn',
         'supervisor',
+
+        # pytheon.deploy depend to pytheon because pytheon.deploy use
+        # some pytheon.utils functions
         'pytheon',
         'Genshi'
     ]

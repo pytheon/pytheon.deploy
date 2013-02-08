@@ -1,0 +1,66 @@
+Django==1.4.3
+Jinja2==2.6
+Paste==1.7.5.1
+Pygments==1.6rc1
+Sphinx==1.1.3
+Sphinx-PyPI-upload==0.2.1
+coverage==3.6
+docutils==0.10
+evg.recipe.activate==0.5
+gp.vcsdevelop==2.2.3
+meld3==0.6.10
+nose==1.2.1
+setuptools==0.6c12dev-r88846
+unittest2==0.5.1
+zc.recipe.egg==1.3.2
+zope.testing==4.1.1
+
+#Required by:
+#pytheon 0.1
+#pytheon.deploy 0.1
+ConfigObject==1.2.2
+
+#Required by:
+#pytheon.deploy 0.1
+Genshi==0.6
+
+#Required by:
+#pytheon.deploy 0.1
+#PasteScript 1.7.5
+PasteDeploy==1.5.0
+
+#Required by:
+#pytheon.deploy 0.1
+PasteScript==1.7.5
+
+#Required by:
+#pytheon.deploy 0.1
+SQLAlchemy==0.8.0b2
+
+#Required by:
+#pytheon.deploy 0.1
+collective.recipe.template==1.9
+
+#Required by:
+#pytheon.deploy 0.1
+gunicorn==0.17.2
+
+#Required by:
+#pytheon.deploy 0.1
+supervisor==3.0b1
+
+#Required by:
+#pytheon.deploy 0.1
+z3c.recipe.scripts==1.0.1
+
+#Required by:
+#pytheon.deploy 0.1
+zc.buildout==1.7.0
+
+#Required by:
+#zope.testing 4.1.1
+zope.exceptions==4.0.5
+
+#Required by:
+#zope.testing 4.1.1
+zope.interface==4.0.3
