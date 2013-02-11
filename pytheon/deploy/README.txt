@@ -157,6 +157,7 @@ Running the buildout gives us::
     ...
     [app:main]
     paste.app_factory = pytheon.deploy.django_utils:make_django
+    ...
     <BLANKLINE>
 
     >>> ls('bin')
@@ -214,8 +215,8 @@ We'll start by creating a buildout that uses the recipe::
     >>> write('requirements.txt',
     ... """
     ... Django
-    ... -e hg+https://bitbucket.org/ianb/webob#egg=WebOb
-    ... -e hg+https://bitbucket.org/ianb/webtest#egg=WebTest
+    ... -e git+http://github.com/Pylons/webob.git#egg=WebOb
+    ... -e git+http://github.com/Pylons/webtest.git#egg=WebTest
     ... """)
 
     >>> write('buildout.cfg',
