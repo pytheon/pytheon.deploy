@@ -42,6 +42,11 @@ def setUp(test):
     # Install any other recipes that should be available in the tests
     #zc.buildout.testing.install('collective.recipe.foobar', test)
 
+    zc.buildout.easy_install.default_index_url = 'http://pypi.python.org/simple'
+    os.environ['buildout-testing-index-url'] = (
+        zc.buildout.easy_install.default_index_url
+    )
+
 globs = {}
 
 

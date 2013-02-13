@@ -14,6 +14,12 @@ __all__ = ('CONFIG', 'Config', 'utils', 'log')
 ETC_DIR = os.path.join(os.environ.get('PYTHEON_PREFIX', '/'), 'etc', 'pytheon')
 
 
+if 'PYTHEON_EGGS_DIR' not in os.environ:
+    os.environ['PYTHEON_EGGS_DIR'] = os.path.expanduser('~/eggs')
+
+if (not os.path.isdir(os.environ['PYTHEON_EGGS_DIR'])):
+    os.makedirs(os.environ['PYTHEON_EGGS_DIR'])
+
 EGGS_DIR = os.environ.get('PYTHEON_EGGS_DIR', None)
 
 if not EGGS_DIR:
