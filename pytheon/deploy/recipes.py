@@ -10,6 +10,8 @@ import logging
 from hashlib import sha1
 from os.path import join
 from shutil import rmtree
+
+import zc.buildout
 from z3c.recipe.scripts import Scripts
 from collective.recipe.template.genshitemplate import Recipe as Template
 
@@ -117,6 +119,7 @@ class Base(object):
     def __init__(self, buildout, name, options):
         self.buildout, self.name, self.options = buildout, name, options
         self.logger = logging.getLogger(name.title())
+        self.logger.debug(self.options.items())
 
         if 'inherit' in self.options:
             inherit_options = self.buildout[self.options['inherit']]
@@ -126,14 +129,19 @@ class Base(object):
 
         if 'project_name' not in self.options:
             self.options['project_name'] = os.path.basename(os.getcwd())
+            self.logger.debug('project_name option not found, init with default value : %s' % self.options['project_name'])
+            
         if 'uuid' not in self.options:
             self.options['uuid'] = str(uuid.uuid4())
+            self.logger.debug('uuid option not found, init with default value : %s' % self.options['project_name'])
+
         if 'password' not in self.options:
             if utils.PY3:
                 id = str(uuid.uuid4()).encode('ascii')
             else:
                 id = str(uuid.uuid4())
             self.options['password'] = str(sha1(id).hexdigest())
+            self.logger.debug('uuid option not found, init with default value : %s' % self.options['project_name'])
 
         self.options['uid'] = getpass.getuser()
         self.options['gid'] = grp.getgrgid(os.getegid())[0]
@@ -296,8 +304,7 @@ class Wsgi(Base):
         filename = self.buildout['buildout'].get('dump-picked-versions-file')
         if filename:
             config = Config()
-            config.versions = dict(
-                            [(pkg.project_name, pkg.version) for pkg in ws])
+            config.versions = dict([(pkg.project_name, pkg.version) for pkg in ws])
             config.write(filename)
 
         extra_paths = self.options.get('extra-paths', '')
@@ -313,32 +320,34 @@ class Wsgi(Base):
         config = self.config
         addons_requires = self.addons_requires
         self.install_script(
-                name='wsgi',
-                bin_directory=self.lib_dir,
-                entry_points='pytheon_wsgi.py=logging:warn',
-                scripts='pytheon_wsgi.py=pytheon_wsgi.py',
-                arguments='"%s run as a main module", __file__',
-                extra_paths=extra_paths,
-                eggs=self.options['eggs'] +
-                     '\npytheon.deploy\nPasteDeploy\nsqlalchemy' +
-                     addons_requires,
-                script_initialization=WSGI_SCRIPT % config,
-                )
+            name='wsgi',
+            bin_directory=self.lib_dir,
+            entry_points='pytheon_wsgi.py=logging:warn',
+            scripts='pytheon_wsgi.py=pytheon_wsgi.py',
+            arguments='"%s run as a main module", __file__',
+            extra_paths=extra_paths,
+            eggs=self.options['eggs'] +
+                 '\npytheon.deploy\nPasteDeploy\nsqlalchemy' +
+                 addons_requires,
+            script_initialization=WSGI_SCRIPT % config,
+        )
         wsgi_script = os.path.join(self.lib_dir, 'pytheon_wsgi.py')
 
         # bin/touch script
         self.install_script(
-                name='touch',
-                scripts='touch-wsgi=touch-wsgi',
-                extra_paths='', eggs='',
-                entry_points='touch-wsgi=os:utime',
-                arguments='%r, (t, t)' % wsgi_script,
-                script_initialization='import time; t = time.time()')
+            name='touch',
+            scripts='touch-wsgi=touch-wsgi',
+            extra_paths='', eggs='',
+            entry_points='touch-wsgi=os:utime',
+            arguments='%r, (t, t)' % wsgi_script,
+            script_initialization='import time; t = time.time()'
+        )
 
         # bin/backup-db
         backup_db = os.path.join(
-                os.path.dirname(os.path.abspath(sys.argv[0])),
-                'backup-db')
+            os.path.dirname(os.path.abspath(sys.argv[0])),
+            'backup-db'
+        )
         if os.path.isfile(backup_db):
             self.install_script(
                 name='backup',
@@ -423,7 +432,6 @@ class Supervisor(Base):
     """Install supervisord"""
 
     def install_supervisor(self, programs=None):
-
         if utils.PY3:
             return ()
 
@@ -445,18 +453,20 @@ class Supervisor(Base):
             config = self.install_config('supervisor.conf', include_file=None)
 
         self.install_script(
-                name='supervisor',
-                eggs='supervisor\nmeld3',
-                scripts='supervisorctl=pytheonctl',
-                script_initialization=('import sys;'
-                                       'sys.argv[1:1] = ["-c", %r]') % config,
-                arguments='sys.argv[1:]')
+            name='supervisor',
+            eggs='supervisor\nmeld3',
+            scripts='supervisorctl=pytheonctl',
+            script_initialization=('import sys;'
+                                   'sys.argv[1:1] = ["-c", %r]') % config,
+            arguments='sys.argv[1:]'
+        )
         self.install_script(
-                name='supervisor',
-                eggs='supervisor\nmeld3',
-                scripts='supervisord=pytheond',
-                script_initialization=('import sys;'
-                                       'sys.argv[1:] = ["-c", %r]') % config)
+            name='supervisor',
+            eggs='supervisor\nmeld3',
+            scripts='supervisord=pytheond',
+            script_initialization=('import sys;'
+                                   'sys.argv[1:] = ["-c", %r]') % config
+        )
 
         # restart supervisor
         pid = join(self.run_dir, 'supervisord.pid')
@@ -493,27 +503,37 @@ class Nginx(Wsgi, Supervisor):
         rmtree(www_root)
         locations = []
         if static_paths:
-            static_paths = [p.split('=') for p in static_paths.split('\n')
-                                         if p.strip() and '=' in p]
+            static_paths = [
+                p.split('=') for p in static_paths.split('\n') if p.strip() and '=' in p
+            ]
             for location, path in static_paths:
                 location = location.strip()
                 path = path.strip()
                 path = os.path.realpath(path.replace('%(here)s', self.curdir))
-                if path.startswith(self.curdir) and \
-                   '/' not in location.strip('/'):
+                if (
+                    path.startswith(self.curdir) and
+                    '/' not in location.strip('/')
+                ):
                     location = '/%s/' % location.strip('/')
                     www_root = utils.realpath(self.var_dir, 'www')
                     os.symlink(path, os.path.realpath(join(www_root,
                                                       location.strip('/'))))
                     locations.append(location)
+        self.logger.debug('Generate nginx.conf')
+        if 'host' not in self.options.keys():
+            raise zc.buildout.UserError(
+                '"host" field missing in "%s" recipe of "%s" part' % (self.options['recipe'], self.name)
+            )
+
+        self.logger.debug('"host" : %s' % self.options['host'])
         self.install_config('nginx.conf', www=www_root, locations=locations)
 
     def install(self):
         self.install_wsgi()
         self.install_nginx_config()
-        self.install_supervisor(programs=['server = %s' % join(
-                                                            self.bin_dir,
-                                                            'pytheon-serve')])
+        self.install_supervisor(
+            programs=['server = %s' % join(self.bin_dir, 'pytheon-serve')]
+        )
         return tuple()
 
     update = install
@@ -524,12 +544,12 @@ class Deploy(Nginx):
     nginx/apache vhosts"""
 
     def install(self):
-        self.install_wsgi()
+        self.install_wsgi()  # XXX install_nginx_config also execute install_wsgi
         self.install_config('apache.conf')
         self.install_nginx_config()
-        self.install_supervisor(programs=['server = %s' % join(
-                                                            self.bin_dir,
-                                                            'pytheon-serve')])
+        self.install_supervisor(
+            programs=['server = %s' % join(self.bin_dir, 'pytheon-serve')]
+        )
         return tuple()
 
     update = install
