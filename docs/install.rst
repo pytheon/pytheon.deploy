@@ -9,10 +9,10 @@ Get the bootstrap_ script. And run it :
 
 .. code-block:: sh
 
-  $ curl -O https://raw.github.com/pytheon/pytheon.deploy/master/deploy/pytheon_bootstrap.py
   $ PREFIX=/opt/pytheon
   $ mkdir $PREFIX
   $ cd $PREFIX
+  $ curl -O https://raw.github.com/pytheon/pytheon.deploy/master/deploy/pytheon_bootstrap.py
   $ python pytheon_bootstrap.py
 
 .. _bootstrap: https://raw.github.com/pytheon/pytheon.deploy/master/deploy/pytheon_bootstrap.py
