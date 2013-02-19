@@ -167,7 +167,7 @@ env = dict(
     PYTHONPATH=setup_requirement_path)
 
 requirements = [
-    'zc.buildout',
+    'zc.buildout==1.7.0',
 ]
 cmd.extend(requirements)
 
