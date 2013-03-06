@@ -171,8 +171,6 @@ requirements = [
 ]
 cmd.extend(requirements)
 
-
-print cmd
 exitcode = os.spawnle(*([os.P_WAIT, sys.executable] + cmd + [env]))
 if exitcode != 0:
     sys.stdout.flush()
