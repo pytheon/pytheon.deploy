@@ -130,7 +130,7 @@ class Base(object):
         if 'project_name' not in self.options:
             self.options['project_name'] = os.path.basename(os.getcwd())
             self.logger.debug('project_name option not found, init with default value : %s' % self.options['project_name'])
-            
+
         if 'uuid' not in self.options:
             self.options['uuid'] = str(uuid.uuid4())
             self.logger.debug('uuid option not found, init with default value : %s' % self.options['project_name'])
@@ -146,15 +146,17 @@ class Base(object):
         self.options['uid'] = getpass.getuser()
         self.options['gid'] = grp.getgrgid(os.getegid())[0]
         self.options['eggs'] = self.options.get('eggs', 'PasteDeploy')
-        self.options['eggs'] += '\n' + self.buildout['buildout'].get(
-                                                    'requirements-eggs', '')
+        self.options['eggs'] += '\n' + self.buildout['buildout'].get('requirements-eggs', '')
 
         self.options['include'] = self.options.get('include', '')
 
         self.curdir = os.path.realpath(buildout['buildout']['directory'])
-        self.deploy_dir = utils.realpath(options.get('deploy-dir',
-                             join(self.buildout['buildout']['parts-directory'],
-                             self.name)))
+        self.deploy_dir = utils.realpath(
+            options.get(
+                'deploy-dir',
+                join(self.buildout['buildout']['parts-directory'], self.name)
+            )
+        )
         self.bin_dir = self.buildout['buildout']['bin-directory']
         self.lib_dir = utils.realpath(self.deploy_dir, 'lib')
         self.var_dir = utils.realpath(self.deploy_dir, 'var')
@@ -168,7 +170,7 @@ class Base(object):
             var_dir=self.var_dir,
             log_dir=utils.realpath(self.var_dir, 'log'),
             run_dir=self.run_dir,
-          )
+        )
         for k, v in dirnames.items():
             self.options[k] = v
 
@@ -274,6 +276,9 @@ class Wsgi(Base):
                         'deploy-%s.ini' % self.options['project_name'])
         if not os.path.isfile(filename):
             filename = join(self.curdir, 'deploy.ini')
+
+        self.logger.debug('Use %s' % filename)
+
         config = Config.from_file(filename, here=self.curdir, __file__=deploy)
         config['server:pytheon'] = dict(use='egg:Paste#http',
                                         host=http_host, port=http_port)
