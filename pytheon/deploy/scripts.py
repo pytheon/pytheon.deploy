@@ -58,16 +58,19 @@ def admin():
                       default=os.environ.get('HOSTS', '').split(';'))
     parser.add_option("-r", "--root", dest="root",
                       action="store", default=root,
-                      help='Default to %s' % root)
+                      help='Default to ~/root/')
     parser.add_option("-e", "--eggs", dest="eggs",
                       action="store", default=os.path.expanduser('~/eggs'),
-                      help='Default to: ' + os.path.expanduser('~/eggs'))
+                      help='Default to: ~/eggs/')
     parser.add_option("--develop", dest="develop",
                       action="append", default=[], help="Testing only")
     parser.add_option("--develop-dir", dest="develop_dir",
                       default=os.environ.get('DEVELOP_DIR', None),
                       help=("Used for buildout:develop-dir. "
                             "Default to $DEVELOP_DIR if exist"))
+    parser.add_option("-v", "--verbose", dest="verbose",
+                      action="store_true",
+                      help="Verbose mode")
 
     (options, args) = parser.parse_args()
 
@@ -187,8 +190,13 @@ def admin():
     env = os.environ
     env.update(dict([v.split('=', 1) for v in args if '=' in v]))
 
-    utils.buildout(options.interpreter, buildout,
-                   eggs=CONFIG.pytheon.eggs_dir, env=env)
+    utils.buildout(
+        options.interpreter,
+        buildout,
+        eggs=CONFIG.pytheon.eggs_dir,
+        verbose=options.verbose,
+        env=env
+    )
 
     if os.path.isfile('post_install.sh'):
         lib_dir = join(root, 'lib')
