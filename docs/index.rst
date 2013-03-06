@@ -51,6 +51,8 @@ Contents
 
    install.rst
    configuration.rst
+   recipes.rst
+   commands.rst
    deploy.rst
    vagrant.rst
    tips.rst

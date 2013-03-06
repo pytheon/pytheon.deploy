@@ -69,6 +69,10 @@ or in ``buildout.cfg`` file :
     host=mydomain.com
 
 
+*deploy-dir* option
+===================
+
+
 pip based application
 =====================
 
