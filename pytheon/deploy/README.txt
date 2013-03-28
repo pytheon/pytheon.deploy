@@ -15,22 +15,19 @@ We'll start by creating a buildout that uses the recipe::
     ... [app:main]
     ... use = egg:Paste#static
     ... document_root = %(here)s
-    ...
-    ... [deploy]
-    ... version = 1
-    ... use = gunicorn
-    ... host = test.pytheon.net
     ... """)
 
     >>> write('buildout.cfg',
     ... """
     ... [buildout]
     ... parts = deploy
-    ... extends = deploy.ini
     ...
     ... [deploy]
+    ... version = 1
     ... recipe = pytheon.deploy
-    ... eggs += PasteScript
+    ... use = gunicorn
+    ... host = test.pytheon.net
+    ... eggs = PasteScript
     ... static_paths =
     ...     /static = %(here)s
     ... """)
@@ -43,6 +40,7 @@ Running the buildout gives us::
     ...
     Generated script...
     Generated script '/sample-buildout/bin/pytheond'.
+    ...
     <BLANKLINE>
 
     >>> cat('parts', 'deploy', 'lib', 'pytheon_wsgi.py')
@@ -120,13 +118,7 @@ Cleaning::
 
 We'll start by creating a buildout that uses the recipe::
 
-    >>> write('deploy.ini',
-    ... """
-    ... [deploy]
-    ... version = 1
-    ... use = gunicorn
-    ... host = test.pytheon.net
-    ... """)
+    >>> write('deploy.ini', '')
 
     >>> write('settings.py',
     ... """
@@ -141,7 +133,10 @@ We'll start by creating a buildout that uses the recipe::
     ...
     ... [deploy]
     ... recipe = pytheon.deploy
-    ... eggs += PasteScript
+    ... eggs = PasteScript
+    ... version = 1
+    ... use = gunicorn
+    ... host = test.pytheon.net
     ... """)
 
 Running the buildout gives us::
@@ -157,7 +152,6 @@ Running the buildout gives us::
     ...
     [app:main]
     paste.app_factory = pytheon.deploy.django_utils:make_django
-    ...
     <BLANKLINE>
 
     >>> ls('bin')
@@ -199,13 +193,7 @@ Cleaning::
 
 We'll start by creating a buildout that uses the recipe::
 
-    >>> write('deploy.ini',
-    ... """
-    ... [deploy]
-    ... version = 1
-    ... use = gunicorn
-    ... host = test.pytheon.net
-    ... """)
+    >>> write('deploy.ini', '')
 
     >>> write('settings.py',
     ... """
@@ -229,6 +217,9 @@ We'll start by creating a buildout that uses the recipe::
     ...
     ... [deploy]
     ... recipe = pytheon.deploy
+    ... version = 1
+    ... use = gunicorn
+    ... host = test.pytheon.net
     ... """)
 
 Running the buildout gives us::
@@ -241,7 +232,7 @@ Running the buildout gives us::
 
 Assume that WebOb is a dependencie::
 
-    >>> print 'File', cat('parts', 'deploy_django', 'site.py')
+    >>> print 'File', cat('bin', 'pytheon-serve')
     File...
     ...'/sample-buildout/WebOb',...
     ...'/sample-buildout/WebTest',...

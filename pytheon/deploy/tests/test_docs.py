@@ -33,7 +33,7 @@ def setUp(test):
     zc.buildout.testing.install_develop('Paste', test)
     zc.buildout.testing.install_develop('PasteDeploy', test)
     zc.buildout.testing.install_develop('PasteScript', test)
-    zc.buildout.testing.install_develop('zc.recipe.egg==1.3.2', test)
+    zc.buildout.testing.install_develop('zc.recipe.egg', test)
     zc.buildout.testing.install_develop('gp.vcsdevelop', test)
     zc.buildout.testing.install_develop('z3c.recipe.scripts', test)
     zc.buildout.testing.install_develop('collective.recipe.template', test)

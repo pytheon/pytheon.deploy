@@ -12,7 +12,7 @@ from os.path import join
 from shutil import rmtree
 
 import zc.buildout
-from z3c.recipe.scripts import Scripts
+from zc.recipe.egg import Egg
 from collective.recipe.template.genshitemplate import Recipe as Template
 
 from pytheon.deploy import Config
@@ -210,6 +210,10 @@ class Base(object):
 
     @safe_options
     def install_script(self, name, **kwargs):
+        if 'script_initialization' in kwargs:
+            script_init = kwargs.pop('script_initialization')
+            init = self.options.get('initialization', '')
+            self.options['initialization'] = init + '\n' + script_init
         if name != self.name:
             name = '%s_%s' % (self.name, name)
         for k, v in kwargs.items():
@@ -221,7 +225,7 @@ class Base(object):
             else:
                 self.options[k] = v
         self.log('using %s', ', '.join(self.options['eggs'].split('\n')))
-        scripts = Scripts(self.buildout, name, self.options)
+        scripts = Egg(self.buildout, name, self.options)
         scripts.install()
 
     @property
@@ -303,7 +307,7 @@ class Wsgi(Base):
 
     def install_wsgi(self):
         """Install a wsgi application and scripts. Take care of django"""
-        eggs = Scripts(self.buildout, self.options['recipe'], self.options)
+        eggs = Egg(self.buildout, self.options['recipe'], self.options)
         reqs, ws = eggs.working_set()
 
         filename = self.buildout['buildout'].get('dump-picked-versions-file')

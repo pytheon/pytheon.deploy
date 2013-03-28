@@ -2,7 +2,9 @@
 """
 This module contains the tool of pytheon.deploy
 """
-import os, sys, re
+import re
+import os
+import sys
 from setuptools import setup, find_packages
 
 PY3 = sys.version_info[0] == 3
@@ -26,7 +28,7 @@ if PY3:
         'setuptools',
         'zc.buildout',
         'collective.recipe.template',
-        'z3c.recipe.scripts',
+        'zc.recipe.egg',
         'gp.vcsdevelop>=2.2',
         'ConfigObject',
         'PasteDeploy',
@@ -91,7 +93,7 @@ setup(
     entry_points="""
     [zc.buildout]
     default = pytheon.deploy.recipes:Deploy
-    scripts = pytheon.deploy.recipes:Scripts
+    scripts = pytheon.deploy.recipes:Egg
     wsgi = pytheon.deploy.recipes:Wsgi
     apache = pytheon.deploy.recipes:Apache
     nginx = pytheon.deploy.recipes:Nginx
