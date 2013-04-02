@@ -43,6 +43,7 @@ else:
     install_requires = [
         'setuptools',
         'zc.buildout',
+        'zc.recipe.egg',
         'collective.recipe.template',
         'gp.vcsdevelop>=2.2',
         'ConfigObject',
