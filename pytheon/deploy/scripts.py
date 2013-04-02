@@ -207,8 +207,13 @@ def admin():
 
 def build_eggs(args=None):
 
-    parser.add_option("-i", "--interpreter", dest="interpreters",
-                      action="append", default=[])
+    parser.add_option(
+        "-i", "--interpreter", dest="interpreters",
+        action="append", default=[])
+    parser.add_option(
+        "--branch", dest="branch",
+        default='master',
+        help="Select the branch version to install. Default value : 'master'")
 
     if args is not None:
         (options, args) = parser.parse_args(args)
@@ -216,7 +221,7 @@ def build_eggs(args=None):
         (options, args) = parser.parse_args()
 
     interpreters = options.interpreters or \
-                   ['.'.join([str(i) for i in sys.version_info[:2]])]
+        ['.'.join([str(i) for i in sys.version_info[:2]])]
 
     bin_dir = os.path.dirname(os.path.abspath(sys.argv[0]))
 
@@ -237,6 +242,8 @@ def build_eggs(args=None):
 
     os.chdir(pwd)
 
+    b = options.branch
+
     for i, interpreter in enumerate(interpreters):
         build_dir = os.path.join(pwd, 'build', interpreter)
         if not os.path.isdir(build_dir):
@@ -249,13 +256,13 @@ def build_eggs(args=None):
         config.buildout['bin-directory'] = bin_dir
         config.buildout['eggs-directory'] = eggs_dir
         config.buildout['dump-picked-versions-file'] = os.path.join(
-                               eggs_dir, 'python%s-versions.cfg' % interpreter)
+            eggs_dir, 'python%s-versions.cfg' % interpreter)
         config.buildout.extends = CONFIG.build_eggs.extends
         config.buildout['find-links'] = [
-            'https://github.com/pytheon/pytheon/tarball/master#egg=pytheon',
-            ('https://github.com/pytheon/pytheon.deploy/tarball/master'
-             '#egg=pytheon.deploy'),
-          ]
+            'https://github.com/pytheon/pytheon/tarball/%s#egg=pytheon' % b,
+            ('https://github.com/pytheon/pytheon.deploy/tarball/%s'
+             '#egg=pytheon.deploy') % b,
+        ]
         config.versions = {'none': '0.0'}
         eggs = CONFIG.build_eggs.eggs.as_list()
         for egg in ['pytheon.deploy', 'zc.buildout']:
@@ -273,10 +280,11 @@ def build_eggs(args=None):
             "os.environ['PYTHEON_PREFIX'] = %(PYTHEON_PREFIX)r" % env,
             ("os.environ['PYTHEON_EGGS_DIR'] ="
              "os.environ['PYTHON_EGGS'] = %(PYTHEON_EGGS_DIR)r") % env,
-          ]
+        ]
         config.write(buildout)
-        utils.buildout('python%s' % interpreter, buildout=buildout,
-                                                 eggs=eggs_dir)
+        utils.buildout(
+            'python%s' % interpreter, buildout=buildout,
+            eggs=eggs_dir)
 
 
 def backup_db():

@@ -35,7 +35,6 @@ def setUp(test):
     zc.buildout.testing.install_develop('PasteScript', test)
     zc.buildout.testing.install_develop('zc.recipe.egg', test)
     zc.buildout.testing.install_develop('gp.vcsdevelop', test)
-    zc.buildout.testing.install_develop('z3c.recipe.scripts', test)
     zc.buildout.testing.install_develop('collective.recipe.template', test)
     zc.buildout.testing.install_develop('pytheon.deploy', test)
 

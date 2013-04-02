@@ -44,7 +44,6 @@ else:
         'setuptools',
         'zc.buildout',
         'collective.recipe.template',
-        'z3c.recipe.scripts',
         'gp.vcsdevelop>=2.2',
         'ConfigObject',
         'PasteDeploy',
