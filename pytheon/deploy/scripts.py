@@ -8,6 +8,7 @@ from glob import glob
 from os.path import join
 
 from optparse import OptionParser
+from ConfigObject import ConfigObject
 
 from pytheon.deploy import CONFIG
 from pytheon.deploy import Config
@@ -177,12 +178,21 @@ def admin():
         config.buildout.requirements = 'requirements.txt'
 
     extends = []
-    for filename in ('buildout.cfg', 'versions.cfg',
-                     'deploy-%s.ini' % app_name, 'deploy.ini'):
+    for filename in ('buildout.cfg', 'versions.cfg'):
         filename = utils.realpath(os.getcwd(), filename)
         if os.path.isfile(filename):
             extends.append(filename)
     config.buildout.extends = extends
+
+    inis = ConfigObject()
+    for filename in ('deploy-%s.ini' % app_name, 'deploy.ini'):
+        filename = utils.realpath(os.getcwd(), filename)
+        if os.path.isfile(filename):
+            inis.read(filename)
+    if inis.deploy:
+        for k, v in inis.deploy.items():
+            if k not in ('recipe',):
+                config.deploy[k] = v
 
     buildout = 'pytheon.cfg'
     config.write(buildout)
