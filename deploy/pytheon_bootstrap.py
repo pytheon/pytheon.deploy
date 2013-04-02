@@ -167,7 +167,7 @@ env = dict(
     PYTHONPATH=setup_requirement_path)
 
 requirements = [
-    'zc.buildout==1.7.0',
+    'zc.buildout>=2.0',
 ]
 cmd.extend(requirements)
 
@@ -198,9 +198,9 @@ parts-directory = %(lib_dir)s/parts
 develop-eggs-directory = %(lib_dir)s/develop-eggs
 
 [bootstrap]
-recipe = z3c.recipe.scripts
+recipe = zc.recipe.egg
 eggs = zc.buildout
-script-initialization =
+initialization =
     import os
     os.chdir(%(PYTHEON_PREFIX)r)
     if os.path.isfile('.installed.cfg'): os.remove('.installed.cfg')
@@ -212,7 +212,7 @@ arguments = ['-c', %(buildout)r] + ['pytheon:eggs+=' + a for a in sys.argv[1:]]
 scripts = pytheon-upgrade
 
 [pytheon]
-recipe = z3c.recipe.scripts
+recipe = zc.recipe.egg
 eggs =
     %(reqs)s
     ${buildout:eggs}
