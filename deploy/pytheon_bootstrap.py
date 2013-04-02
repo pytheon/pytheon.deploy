@@ -171,6 +171,12 @@ requirements = [
 ]
 cmd.extend(requirements)
 
+develop = []
+if os.path.isfile('pytheon/setup.py'):
+    develop.append(os.path.abspath('pytheon'))
+if os.path.isfile('pytheon.deploy/setup.py'):
+    develop.append(os.path.abspath('pytheon.deploy'))
+
 exitcode = os.spawnle(*([os.P_WAIT, sys.executable] + cmd + [env]))
 if exitcode != 0:
     sys.stdout.flush()
@@ -192,6 +198,7 @@ open(buildout, 'w').write('''
 [buildout]
 parts = bootstrap pytheon
 extends = https://raw.github.com/pytheon/pytheon.deploy/%(branch)s/deploy/%(version_filename)s
+develop = %(develop)s
 eggs-directory = %(PYTHEON_EGGS_DIR)s
 bin-directory = %(PYTHEON_PREFIX)s/bin
 parts-directory = %(lib_dir)s/parts
@@ -227,6 +234,7 @@ initialization =
     reqs='\n    '.join(options.requirements),
     branch=options.branch,
     extends='',  # '\n    '.join(extends),
+    develop='\n    '.join(develop),
     version_filename=version_filename
 ))
 
@@ -255,6 +263,7 @@ if not os.path.isdir(etc_dir):
 open(os.path.join(etc_dir, 'pytheon.ini'), 'w').write('''
 [build_eggs]
 extends = %(extends)s
+develop = %(develop)s
 scripts =
     pytheon-admin
     pytheon-eggs
@@ -263,7 +272,9 @@ scripts =
 eggs =
     zc.buildout
     gp.vcsdevelop
-''' % dict(extends='\n    '.join(extends)))
+''' % dict(
+    extends='\n    '.join(extends),
+    develop='\n    '.join(develop)))
 
 ws.add_entry(eggs_dir)
 for r in requirements:
