@@ -61,8 +61,7 @@ Running the buildout gives us::
     ...
     [app:main]
     use = egg:Paste#static
-    document_root = /sample-buildout
-    ...
+    document_root = /sample-buildout...
     <BLANKLINE>
 
     >>> ls('parts', 'deploy', 'var', 'www')
