@@ -39,8 +39,7 @@ Running the buildout gives us::
     Installing deploy.
     ...
     Generated script...
-    Generated script '/sample-buildout/bin/pytheond'.
-    ...
+    Generated script '/sample-buildout/bin/pytheond'...
     <BLANKLINE>
 
     >>> cat('parts', 'deploy', 'lib', 'pytheon_wsgi.py')
@@ -52,12 +51,9 @@ Running the buildout gives us::
     <BLANKLINE>
 
     >>> ls('bin')
-    -  buildout
-    -  paster
+    -  b...
     -  pytheon-serve
-    -  pytheon-update
-    -  pytheonctl
-    -  pytheond
+    ...
     -  touch-wsgi
 
     >>> cat('parts', 'deploy', 'etc', 'deploy.ini')
@@ -155,13 +151,9 @@ Running the buildout gives us::
     <BLANKLINE>
 
     >>> ls('bin')
-    -  buildout
-    -  manage
-    -  paster
+    -  b...
     -  pytheon-serve
-    -  pytheon-update
-    -  pytheonctl
-    -  pytheond
+    ...
     -  touch-wsgi
 
 We have a ``bin/manage`` script::
