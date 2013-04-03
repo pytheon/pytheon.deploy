@@ -1,2 +1,5 @@
-recursive-include pytheon/deploy/ *.in
-recursive-include etc/ *.ini
+graft docs
+graft pytheon
+include *.rst *.cfg *.ini
+global-exclude *.pyc
+global-exclude __pycache__
