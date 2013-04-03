@@ -97,8 +97,8 @@ def safe_options(func):
     """A decorator to be able to modify some configuration option but restore
     them when it's done"""
     def wrapper(self, *args, **kwargs):
-        self.log('running %s', getattr(func, 'func_name',
-                               getattr(func, '__name__', '')))
+        self.log('running %s',
+                 getattr(func, 'func_name', getattr(func, '__name__', '')))
         options = self.options.copy()
         result = func(self, *args, **kwargs)
         keys = self.options.keys()
@@ -129,11 +129,15 @@ class Base(object):
 
         if 'project_name' not in self.options:
             self.options['project_name'] = os.path.basename(os.getcwd())
-            self.logger.debug('project_name option not found, init with default value : %s' % self.options['project_name'])
+            self.logger.debug(
+                'project_name option not found, init with default value : %s',
+                self.options['project_name'])
 
         if 'uuid' not in self.options:
             self.options['uuid'] = str(uuid.uuid4())
-            self.logger.debug('uuid option not found, init with default value : %s' % self.options['project_name'])
+            self.logger.debug(
+                'uuid option not found, init with default value : %s',
+                self.options['project_name'])
 
         if 'password' not in self.options:
             if utils.PY3:
@@ -141,12 +145,15 @@ class Base(object):
             else:
                 id = str(uuid.uuid4())
             self.options['password'] = str(sha1(id).hexdigest())
-            self.logger.debug('uuid option not found, init with default value : %s' % self.options['project_name'])
+            self.logger.debug(
+                'uuid option not found, init with default value : %s',
+                self.options['project_name'])
 
         self.options['uid'] = getpass.getuser()
         self.options['gid'] = grp.getgrgid(os.getegid())[0]
         self.options['eggs'] = self.options.get('eggs', 'PasteDeploy')
-        self.options['eggs'] += '\n' + self.buildout['buildout'].get('requirements-eggs', '')
+        self.options['eggs'] += '\n' + self.buildout['buildout'].get(
+            'requirements-eggs', '')
 
         self.options['include'] = self.options.get('include', '')
 
@@ -269,7 +276,7 @@ class Wsgi(Base):
                 http_port = open(filename).read().strip()
             else:
                 http_port = current['server:pytheon'].port or \
-                            utils.get_free_port()
+                    utils.get_free_port()
                 f = open(join(self.etc_dir, 'http_port.txt'), 'w')
                 f.write(str(http_port))
                 f.close()
@@ -289,9 +296,9 @@ class Wsgi(Base):
 
         if self.is_django:
             config['app:main'] = {
-                    'paste.app_factory':
-                            'pytheon.deploy.django_utils:make_django',
-                  }
+                'paste.app_factory':
+                'pytheon.deploy.django_utils:make_django',
+            }
 
         fd = StringIO()
         config.write(fd)
@@ -313,7 +320,8 @@ class Wsgi(Base):
         filename = self.buildout['buildout'].get('dump-picked-versions-file')
         if filename:
             config = Config()
-            config.versions = dict([(pkg.project_name, pkg.version) for pkg in ws])
+            config.versions = dict(
+                [(pkg.project_name, pkg.version) for pkg in ws])
             config.write(filename)
 
         extra_paths = self.options.get('extra-paths', '')
@@ -321,13 +329,17 @@ class Wsgi(Base):
         if self.is_django:
             extra_paths.append(os.path.dirname(self.django_setttings))
 
-        self.install_script(name='scripts', extra_paths=extra_paths)
+        addons_requires = self.addons_requires
+        self.install_script(
+            name='scripts', extra_paths=extra_paths,
+            eggs=self.options['eggs'] +
+                 '\npytheon.deploy\nPasteDeploy\nsqlalchemy' +
+                 addons_requires)
 
         # now we can switch in offline mode
         self.buildout['buildout']['offline'] = 'true'
 
         config = self.config
-        addons_requires = self.addons_requires
         self.install_script(
             name='wsgi',
             bin_directory=self.lib_dir,
@@ -369,17 +381,17 @@ class Wsgi(Base):
             # add lib dir to extra_paths so cherrypy can find the wsgi script
             dirname = os.path.dirname(wsgi_script)
             self.install_script(
-                    name='cherrypy',
-                    scripts='pytheon-serve\nceleryd=celeryd',
-                    extra_paths=[dirname] + extra_paths,
-                    entry_points=('pytheon-serve='
-                                  'pytheon.deploy.scripts:cherrypy_serve'),
-                    eggs=self.options['eggs'] +
-                         '\npytheon.deploy\nPasteDeploy\nsqlalchemy' +
-                         addons_requires,
-                    script_initialization=SERVE % ([config,
-                                                    self.options['bind']],)
-                    )
+                name='cherrypy',
+                scripts='pytheon-serve\nceleryd=celeryd',
+                extra_paths=[dirname] + extra_paths,
+                entry_points=('pytheon-serve='
+                              'pytheon.deploy.scripts:cherrypy_serve'),
+                eggs=self.options['eggs'] +
+                     '\npytheon.deploy\nPasteDeploy\nsqlalchemy' +
+                     addons_requires,
+                script_initialization=SERVE % ([config,
+                                                self.options['bind']],)
+            )
         elif self.options.get('use', 'gunicorn') == 'gunicorn':
             self.options['bind'] = 'unix:%s' % join(self.run_dir,
                                                     'gunicorn.sock')
@@ -387,37 +399,37 @@ class Wsgi(Base):
             # add lib dir to extra_paths so gunicorn can find the wsgi script
             dirname = os.path.dirname(wsgi_script)
             self.install_script(
-                    name='gunicorn',
-                    scripts='gunicorn=pytheon-serve\nceleryd=celeryd',
-                    extra_paths=[dirname] + extra_paths,
-                    eggs=self.options['eggs'] +
-                         '\npytheon.deploy\ngunicorn\nsqlalchemy' +
-                         addons_requires,
-                    script_initialization=SERVE % (
-                                                ["-c", gu_config,
-                                                 "pytheon_wsgi:application"],))
+                name='gunicorn',
+                scripts='gunicorn=pytheon-serve\nceleryd=celeryd',
+                extra_paths=[dirname] + extra_paths,
+                eggs=self.options['eggs'] +
+                     '\npytheon.deploy\ngunicorn\nsqlalchemy' +
+                     addons_requires,
+                script_initialization=SERVE % (
+                    ["-c", gu_config,
+                     "pytheon_wsgi:application"],))
         else:
             self.install_script(
-                    name='pastescript',
-                    scripts='paster=pytheon-serve\nceleryd=celeryd',
-                    extra_paths=extra_paths,
-                    eggs=self.options['eggs'] +
-                         '\npytheon.deploy\nPasteScript\nsqlalchemy' +
-                         addons_requires,
-                    script_initialization=SERVE % (
-                                                ["serve",
-                                                 "--server-name=pytheon",
-                                                 config],))
+                name='pastescript',
+                scripts='paster=pytheon-serve\nceleryd=celeryd',
+                extra_paths=extra_paths,
+                eggs=self.options['eggs'] +
+                     '\npytheon.deploy\nPasteScript\nsqlalchemy' +
+                     addons_requires,
+                script_initialization=SERVE % (
+                    ["serve",
+                     "--server-name=pytheon",
+                     config],))
 
         if self.is_django:
             self.install_script(
-                    name='django',
-                    scripts='manage',
-                    eggs=self.options['eggs'] +
-                         '\npytheon.deploy\nsqlalchemy' + addons_requires,
-                    entry_points='manage=pytheon.deploy.django_utils:manage',
-                    extra_paths=extra_paths,
-                    arguments='%r' % config)
+                name='django',
+                scripts='manage',
+                eggs=self.options['eggs'] +
+                     '\npytheon.deploy\nsqlalchemy' + addons_requires,
+                entry_points='manage=pytheon.deploy.django_utils:manage',
+                extra_paths=extra_paths,
+                arguments='%r' % config)
 
         if 'CELERY_URL' in os.environ:
             celeryconfig = join(self.lib_dir, 'celeryconfig.py')
@@ -426,11 +438,11 @@ class Wsgi(Base):
 
         if not os.path.isfile(join(self.bin_dir, 'pytheon-update')):
             self.install_script(
-                    name='buildout',
-                    scripts='buildout=pytheon-update',
-                    eggs='pytheon.deploy\nzc.buildout',
-                    script_initialization=BUILDOUT % self.curdir,
-                    )
+                name='buildout',
+                scripts='buildout=pytheon-update',
+                eggs='pytheon.deploy\nzc.buildout',
+                script_initialization=BUILDOUT % self.curdir,
+            )
 
         return tuple()
 
@@ -456,8 +468,12 @@ class Supervisor(Base):
                                                          'celeryd'))
 
         if programs:
-            config = self.install_config('app-supervisor.conf', programs=programs)
-            config = self.install_config('supervisor.conf', include_file=config)
+            config = self.install_config(
+                'app-supervisor.conf',
+                programs=programs)
+            config = self.install_config(
+                'supervisor.conf',
+                include_file=config)
         else:
             config = self.install_config('supervisor.conf', include_file=None)
 
@@ -513,7 +529,8 @@ class Nginx(Wsgi, Supervisor):
         locations = []
         if static_paths:
             static_paths = [
-                p.split('=') for p in static_paths.split('\n') if p.strip() and '=' in p
+                p.split('=') for p in static_paths.split('\n')
+                if p.strip() and '=' in p
             ]
             for location, path in static_paths:
                 location = location.strip()
@@ -530,8 +547,9 @@ class Nginx(Wsgi, Supervisor):
                     locations.append(location)
         self.logger.debug('Generate nginx.conf')
         if 'host' not in self.options.keys():
+            args = (self.options['recipe'], self.name)
             raise zc.buildout.UserError(
-                '"host" field missing in "%s" recipe of "%s" part' % (self.options['recipe'], self.name)
+                '"host" field missing in "%s" recipe of "%s" part' % args
             )
 
         self.logger.debug('"host" : %s' % self.options['host'])
@@ -553,7 +571,7 @@ class Deploy(Nginx):
     nginx/apache vhosts"""
 
     def install(self):
-        self.install_wsgi()  # XXX install_nginx_config also execute install_wsgi
+        self.install_wsgi()  # XXX install_nginx_config execute install_wsgi
         self.install_config('apache.conf')
         self.install_nginx_config()
         self.install_supervisor(
