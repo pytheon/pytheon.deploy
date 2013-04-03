@@ -231,6 +231,8 @@ class Base(object):
                 self.buildout['buildout'][k] = v
             else:
                 self.options[k] = v
+        if 'pytheon' not in self.options['eggs']:
+            self.options['eggs'] = 'pytheon\n' + self.options['eggs']
         self.log('using %s', ', '.join(self.options['eggs'].split('\n')))
         scripts = Egg(self.buildout, name, self.options)
         scripts.install()
