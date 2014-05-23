@@ -116,7 +116,7 @@ prefix = os.path.abspath(options.prefix)
 lib_dir = os.path.join(prefix, 'lib', 'pytheon', 'buildout')
 
 ez = {}
-exec(urlopen('https://bootstrap.pypa.io/ez_setup.py').read(), ez)
+exec(urllib2.urlopen('https://bootstrap.pypa.io/ez_setup.py').read(), ez)
 if not os.path.isdir(lib_dir):
     os.makedirs(lib_dir)
 os.chdir(prefix)
