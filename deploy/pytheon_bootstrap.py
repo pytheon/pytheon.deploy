@@ -72,9 +72,6 @@ for k, v in sys.modules.items():
         sys.modules.pop(k)
 
 
-distribute_source = 'http://python-distribute.org/distribute_setup.py'
-
-
 # parsing arguments
 def normalize_to_url(option, opt_str, value, parser):
     if value:
@@ -116,8 +113,10 @@ parser.add_option("--branch", dest="branch",
 options, args = parser.parse_args()
 
 prefix = os.path.abspath(options.prefix)
-
 lib_dir = os.path.join(prefix, 'lib', 'pytheon', 'buildout')
+
+ez = {}
+exec(urlopen('https://bootstrap.pypa.io/ez_setup.py').read(), ez)
 if not os.path.isdir(lib_dir):
     os.makedirs(lib_dir)
 os.chdir(prefix)
@@ -133,12 +132,7 @@ else:
 if not os.path.isdir(eggs_dir):
     os.makedirs(eggs_dir)
 
-ez_code = urllib2.urlopen(
-    distribute_source).read().replace('\r\n', '\n')
-ez = {}
-exec ez_code in ez
 setup_args = dict(to_dir=eggs_dir, download_delay=0)
-setup_args['no_fake'] = True
 ez['use_setuptools'](**setup_args)
 if 'pkg_resources' in sys.modules:
     reload(sys.modules['pkg_resources'])
@@ -158,7 +152,7 @@ cmd = [quote(sys.executable),
 if not has_broken_dash_S:
     cmd.insert(1, '-S')
 
-setup_requirement = 'distribute'
+setup_requirement = 'setuptools'
 ws = pkg_resources.working_set
 setup_requirement_path = ws.find(
     pkg_resources.Requirement.parse(setup_requirement)).location
@@ -239,7 +233,6 @@ initialization =
 ))
 
 extends = [
-    'http://download.zope.org/zopetoolkit/index/1.1/ztk-versions.cfg',
     'https://raw.github.com/pytheon/pytheon.deploy/%(branch)s/deploy/%(version_filename)s' % {
         'branch': options.branch,
         'version_filename': version_filename
